@@ -1,0 +1,11 @@
+.wd-drag-sort-item {
+  display: block;
+  box-sizing: border-box;
+  transition: opacity 0.1s;
+  touch-action: pan-y;
+
+  &.is-dragging-active {
+    opacity: 1 !important;
+    touch-action: none !important;
+  }
+}

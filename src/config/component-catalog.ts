@@ -673,6 +673,14 @@ const categories: CatalogCategory[] = [
         }
       },
       {
+        id: 'dragSort',
+        titleKey: 'dragsort-tuo-zhuai-pai-xu',
+        docs: {
+          'zh-CN': { slug: 'drag-sort', text: 'DragSort 拖拽排序' },
+          'en-US': { slug: 'drag-sort', text: 'DragSort' }
+        }
+      },
+      {
         id: 'collapse',
         titleKey: 'collapse-zhe-die-mian-ban',
         docs: {
