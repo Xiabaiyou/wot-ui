@@ -124,7 +124,7 @@
         <demo-group :title="copy.groupInteractive">
           <demo-group-item :title="copy.dynamicList">
             <view class="tip">{{ copy.dynamicListTip }}</view>
-            <view style="margin-bottom: 12px; display: flex; gap: 12px">
+            <view class="action-row">
               <wd-button size="small" @click="addItem">{{ copy.addItem }}</wd-button>
               <wd-button size="small" type="danger" @click="removeItem">{{ copy.removeItem }}</wd-button>
             </view>
@@ -261,9 +261,9 @@
                   @drag-start="handleDragStart"
                   @drag-end="handleDragEnd"
                 >
-                  <view class="grid-cell" :style="{ opacity: index === 0 || index === partialDisabledList.length - 1 ? 0.5 : 1 }">
+                  <view class="grid-cell" :class="{ 'grid-cell--disabled': isEdgeItem(index, partialDisabledList.length) }">
                     <text class="text">{{ item.text }}</text>
-                    <text v-if="index === 0 || index === partialDisabledList.length - 1" style="font-size: 10px; color: red">
+                    <text v-if="isEdgeItem(index, partialDisabledList.length)" class="grid-note grid-note--danger">
                       {{ copy.notDraggable }}
                     </text>
                   </view>
@@ -284,9 +284,9 @@
                   @drag-start="handleDragStart"
                   @drag-end="handleDragEnd"
                 >
-                  <view class="grid-cell" :style="{ backgroundColor: index === 0 || index === fixedMoveList.length - 1 ? '#f5f5f5' : '#fff' }">
+                  <view class="grid-cell" :class="{ 'grid-cell--fixed': isEdgeItem(index, fixedMoveList.length) }">
                     <text class="text">{{ item.text }}</text>
-                    <text v-if="index === 0 || index === fixedMoveList.length - 1" style="font-size: 10px; color: #999">
+                    <text v-if="isEdgeItem(index, fixedMoveList.length)" class="grid-note">
                       {{ copy.fixedPosition }}
                     </text>
                   </view>
@@ -313,9 +313,9 @@
                   :index="index"
                   :sortable="index !== 0 && index !== fixedSwapList.length - 1"
                 >
-                  <view class="grid-cell" :style="{ backgroundColor: index === 0 || index === fixedSwapList.length - 1 ? '#f5f5f5' : '#fff' }">
+                  <view class="grid-cell" :class="{ 'grid-cell--fixed': isEdgeItem(index, fixedSwapList.length) }">
                     <text class="text">{{ item.text }}</text>
-                    <text v-if="index === 0 || index === fixedSwapList.length - 1" style="font-size: 10px; color: #999">
+                    <text v-if="isEdgeItem(index, fixedSwapList.length)" class="grid-note">
                       {{ copy.fixedPosition }}
                     </text>
                   </view>
@@ -348,7 +348,7 @@
         <demo-group :title="copy.groupLayout">
           <demo-group-item :title="copy.manualUpdate">
             <view class="tip">{{ copy.manualUpdateTip }}</view>
-            <view style="margin-bottom: 12px; display: flex; gap: 12px">
+            <view class="action-row">
               <wd-button size="small" @click="toggleSize">{{ copy.toggleSize }}</wd-button>
               <wd-button size="small" type="success" @click="updateLayout">{{ copy.refreshLayout }}</wd-button>
             </view>
@@ -383,6 +383,7 @@
 
 <script lang="ts" setup>
 import { useToast } from '@/uni_modules/wot-ui'
+import type { DragSortExpose } from '@/uni_modules/wot-ui/components/wd-drag-sort/types'
 import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -520,7 +521,11 @@ const fixedSwapList = ref(createList(6, copy.value.fixedSwapItem))
 const eventList = ref(createList(6, copy.value.eventItem))
 const strictList = ref(createList(6, copy.value.strictItem).map((item) => ({ ...item, large: false })))
 
-const dragSortRef = ref<any>()
+const dragSortRef = ref<DragSortExpose>()
+
+function isEdgeItem(index: number, total: number) {
+  return index === 0 || index === total - 1
+}
 
 function onScroll(e: any) {
   scrollTop.value = e.detail.scrollTop
@@ -620,6 +625,12 @@ $radius-large: 16rpx;
   font-size: 12px;
 }
 
+.action-row {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 12px;
+}
+
 .grid-container {
   margin: 0 auto;
   display: grid;
@@ -656,6 +667,14 @@ $radius-large: 16rpx;
   border: 1px solid $border-color;
 }
 
+.grid-cell--disabled {
+  opacity: 0.5;
+}
+
+.grid-cell--fixed {
+  background: #f5f5f5;
+}
+
 .grid-item-3 {
   width: 100%;
   height: 120rpx;
@@ -670,6 +689,16 @@ $radius-large: 16rpx;
   font-size: 24rpx;
   color: $text-secondary;
   text-align: center;
+}
+
+.grid-note {
+  margin-top: 6rpx;
+  font-size: 10px;
+  color: $text-muted;
+}
+
+.grid-note--danger {
+  color: red;
 }
 
 .list-container {

@@ -295,7 +295,7 @@ function refreshLayout() {
 | long-press-duration   | 长按多久后触发拖拽，单位毫秒     | `number`                                             | `100`    |
 | use-drag-handle       | 是否仅允许通过拖拽手柄触发拖拽   | `boolean`                                            | `false`  |
 | placeholder-class     | 占位元素自定义类名               | `string`                                             | `''`     |
-| sort-type             | 排序模式，可选 `move` / `swap`   | `string`                                   | `move` |
+| sort-type             | 排序模式，可选值为 `move`、`swap` | `'move' \| 'swap'`                         | `'move'` |
 | strict                | 严格模式，仅允许尺寸相近的项交换 | `boolean`                                            | `false`  |
 | custom-class          | 根节点自定义类名                 | `string`                                             | `''`     |
 | custom-style          | 根节点自定义样式                 | `string`                                             | `''`     |
@@ -326,6 +326,14 @@ function refreshLayout() {
 | drag-end   | 拖拽结束时触发     | -                                                                |
 | dragging   | 拖拽过程中触发     | `{ index, delta, touch }`                                        |
 | scroll     | 自动滚动时触发     | `{ dx, dy }`                                                     |
+
+## Methods
+
+### DragSort
+
+| 方法名 | 说明             | 参数 | 返回值           |
+| ------ | ---------------- | ---- | ---------------- |
+| init   | 重新计算当前布局 | -    | `Promise<void>` |
 
 ## DragSort Slots
 

@@ -7,4 +7,7 @@ export const dragHandleProps = {
 
 export type DragHandleProps = ExtractPropTypes<typeof dragHandleProps>
 
+/**
+ * 拖拽手柄组件实例类型。
+ */
 export type DragHandleInstance = ComponentPublicInstance<DragHandleProps>

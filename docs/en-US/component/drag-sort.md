@@ -327,6 +327,14 @@ function refreshLayout() {
 | dragging   | Triggered while dragging       | `{ index, delta, touch }`                                        |
 | scroll     | Triggered during auto scroll   | `{ dx, dy }`                                                     |
 
+## Methods
+
+### DragSort
+
+| Method | Description                   | Parameters | Return Value     |
+| ------ | ----------------------------- | ---------- | ---------------- |
+| init   | Recalculate the current layout | -          | `Promise<void>` |
+
 ## DragSort Slots
 
 | name        | Description                                        | Parameters |

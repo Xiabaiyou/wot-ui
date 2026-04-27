@@ -79,17 +79,6 @@ watch(
 )
 
 watch(
-  () => parent.value?.isReady.value,
-  (ready) => {
-    if (!ready) {
-      setTimeout(() => {
-        init()
-      }, 100)
-    }
-  }
-)
-
-watch(
   () => parent.value?.getItemStyle(props.index),
   (newStyle) => {
     syncedStyle.value = newStyle || {}
@@ -126,29 +115,13 @@ defineExpose<DragSortItemExpose>({
   getRect
 })
 
-const init = () => {
-  if (!parent.value) return
-}
-
-let initTimer: ReturnType<typeof setTimeout> | null = null
-
 onMounted(() => {
   if (!parent.value) {
     console.error('[wot ui] warning(wd-drag-sort-item): <wd-drag-sort-item> 必须在 <wd-drag-sort> 中使用。')
   }
-
-  initTimer = setTimeout(() => {
-    init()
-    initTimer = null
-  }, 100)
 })
 
 onBeforeUnmount(() => {
-  if (initTimer) {
-    clearTimeout(initTimer)
-    initTimer = null
-  }
-
   if (longPressTimer) {
     clearTimeout(longPressTimer)
     longPressTimer = null

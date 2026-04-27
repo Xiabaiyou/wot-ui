@@ -21,7 +21,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch, type CSSProperties } from 'vue'
 import { useChildren } from '../../composables/useChildren'
 import { clamp, findClosestSlot, generateId, getScrollDirection, moveArrayItem, swapArrayItem, throttle } from './utils'
 import {
@@ -52,6 +52,10 @@ const { linkChildren, children } = useChildren<DragSortItemInstance, DragSortPro
 
 const componentId = generateId()
 const noop = () => undefined
+const DRAG_MOVE_THROTTLE = 30
+const LAYOUT_RETRY_LIMIT = 3
+const LAYOUT_RETRY_DELAY = 50
+const DRAG_END_COMMIT_DELAY = 300
 
 const isReady = ref(false)
 const containerHeight = ref<number | string>('auto')
@@ -85,7 +89,7 @@ defineExpose<DragSortExpose>({
   init: dragInit
 })
 
-const currentSlotStyle = computed(() => {
+const currentSlotStyle = computed<CSSProperties | null>(() => {
   if (draggedIndex.value === -1) return null
 
   const slotIndex = itemToSlot.value[draggedIndex.value]
@@ -104,7 +108,12 @@ const currentSlotStyle = computed(() => {
 })
 
 let initDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let layoutRetryTimer: ReturnType<typeof setTimeout> | null = null
+let layoutRetryCount = 0
 
+/**
+ * 初始化容器与子项位置信息。
+ */
 function dragInit() {
   try {
     const sys = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync()
@@ -141,14 +150,19 @@ function dragInit() {
 }
 
 const retryLayout = () => {
-  if (!(dragInit as any).retryCount) {
-    ;(dragInit as any).retryCount = 0
+  if (layoutRetryCount >= LAYOUT_RETRY_LIMIT) {
+    return
   }
 
-  if ((dragInit as any).retryCount < 3) {
-    ;(dragInit as any).retryCount += 1
-    setTimeout(() => dragInit(), 50)
+  layoutRetryCount += 1
+  if (layoutRetryTimer) {
+    clearTimeout(layoutRetryTimer)
   }
+
+  layoutRetryTimer = setTimeout(() => {
+    layoutRetryTimer = null
+    dragInit()
+  }, LAYOUT_RETRY_DELAY)
 }
 
 const handleLayoutHelper = (containerRect: any) => {
@@ -179,7 +193,11 @@ const handleLayout = (containerRect: any, itemRects: any[]) => {
     return
   }
 
-  ;(dragInit as any).retryCount = 0
+  layoutRetryCount = 0
+  if (layoutRetryTimer) {
+    clearTimeout(layoutRetryTimer)
+    layoutRetryTimer = null
+  }
 
   containerWidth.value = containerRect.width
   const newSlots: any[] = []
@@ -258,6 +276,9 @@ let startY = 0
 let autoScrollTimer: ReturnType<typeof setTimeout> | null = null
 let updateTimer: ReturnType<typeof setTimeout> | null = null
 let silentTimer: ReturnType<typeof setTimeout> | null = null
+let dragMoveLastTime = 0
+let pendingOrder: any[] | null = null
+let pendingChangeDetail: DragSortChangeDetail | null = null
 const touchOffset = ref<any>(null)
 const currentTouch = reactive({ x: 0, y: 0 })
 
@@ -296,6 +317,16 @@ onBeforeUnmount(() => {
   uni.offWindowResize(onWindowResize)
   stopAutoScroll()
 
+  if (layoutRetryTimer) {
+    clearTimeout(layoutRetryTimer)
+    layoutRetryTimer = null
+  }
+
+  if (initDebounceTimer) {
+    clearTimeout(initDebounceTimer)
+    initDebounceTimer = null
+  }
+
   if (updateTimer) {
     clearTimeout(updateTimer)
     updateTimer = null
@@ -306,12 +337,85 @@ onBeforeUnmount(() => {
     silentTimer = null
   }
 
+  layoutRetryCount = 0
+  dragMoveLastTime = 0
+  pendingOrder = null
+  pendingChangeDetail = null
+
   // #ifdef H5
   document.body.style.overflow = ''
   // #endif
 })
 
+/**
+ * 结束当前拖拽并重置内部状态。
+ */
+const cleanupDragState = (shouldEmitDragEnd = false) => {
+  stopAutoScroll()
+  draggedIndex.value = -1
+  dragDelta.x = 0
+  dragDelta.y = 0
+  touchOffset.value = null
+
+  if (shouldEmitDragEnd) {
+    emit('drag-end')
+  }
+}
+
+/**
+ * 在父级 v-model 更新后静默重建布局，避免中间态闪动。
+ */
+const syncLayoutAfterChange = () => {
+  isSilentUpdate.value = true
+
+  if (silentTimer) {
+    clearTimeout(silentTimer)
+    silentTimer = null
+  }
+
+  nextTick(() => {
+    itemToSlot.value = itemToSlot.value.map((_, index) => index)
+
+    dragInit().then(() => {
+      silentTimer = setTimeout(() => {
+        isSilentUpdate.value = false
+      }, 50)
+    })
+  })
+}
+
+/**
+ * 提交拖拽排序结果，并在提交后静默同步布局。
+ */
+const flushPendingUpdate = () => {
+  if (!pendingOrder || !pendingChangeDetail) {
+    return
+  }
+
+  if (updateTimer) {
+    clearTimeout(updateTimer)
+    updateTimer = null
+  }
+
+  const nextOrder = pendingOrder
+  const nextDetail = pendingChangeDetail
+
+  pendingOrder = null
+  pendingChangeDetail = null
+  isInternalUpdate.value = true
+
+  emit('update:modelValue', nextOrder)
+  emit('change', nextOrder, nextDetail)
+  emit('drag-end')
+
+  syncLayoutAfterChange()
+}
+
 function onDragStart(index: number, touch: any, rect: any = null) {
+  if (pendingOrder) {
+    flushPendingUpdate()
+  }
+
   if (!isReady.value) return
 
   draggedIndex.value = index
@@ -413,18 +517,6 @@ const stopAutoScroll = () => {
   }
 }
 
-const cleanupDragState = (shouldEmitDragEnd = false) => {
-  stopAutoScroll()
-  draggedIndex.value = -1
-  dragDelta.x = 0
-  dragDelta.y = 0
-  touchOffset.value = null
-
-  if (shouldEmitDragEnd) {
-    emit('drag-end')
-  }
-}
-
 watch(
   () => props.scrollTop,
   (value) => {
@@ -519,8 +611,8 @@ function onDragMove(touch: any) {
   if (draggedIndex.value === -1) return
 
   const now = Date.now()
-  if (now - ((onDragMove as any).lastTime || 0) < 30) return
-  ;(onDragMove as any).lastTime = now
+  if (now - dragMoveLastTime < DRAG_MOVE_THROTTLE) return
+  dragMoveLastTime = now
 
   currentTouch.x = touch.clientX
   currentTouch.y = touch.clientY
@@ -621,7 +713,10 @@ function onDragEnd() {
     newOrder[slotIndex] = props.modelValue[itemIndex]
   })
 
+  const newIndex = itemToSlot.value[currentDraggedIndex]
   cleanupDragState()
+  pendingOrder = newOrder
+  pendingChangeDetail = { oldIndex: currentDraggedIndex, newIndex }
 
   if (updateTimer) {
     clearTimeout(updateTimer)
@@ -629,27 +724,8 @@ function onDragEnd() {
 
   updateTimer = setTimeout(() => {
     updateTimer = null
-    isInternalUpdate.value = true
-
-    const oldIndex = currentDraggedIndex
-    const newIndex = itemToSlot.value[oldIndex]
-
-    emit('update:modelValue', newOrder)
-    emit('change', newOrder, { oldIndex, newIndex })
-    emit('drag-end')
-
-    isSilentUpdate.value = true
-
-    nextTick(() => {
-      itemToSlot.value = itemToSlot.value.map((_, index) => index)
-
-      dragInit().then(() => {
-        silentTimer = setTimeout(() => {
-          isSilentUpdate.value = false
-        }, 50)
-      })
-    })
-  }, 300)
+    flushPendingUpdate()
+  }, DRAG_END_COMMIT_DELAY)
 }
 
 const isSilentUpdate = ref(false)
