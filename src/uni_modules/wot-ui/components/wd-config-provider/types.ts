@@ -797,6 +797,51 @@ export type checkboxThemeVars = {
   checkboxUncheckedColor?: string // 未选中图标颜色
 }
 
+export type colorPickerThemeVars = {
+  colorPickerBg?: string
+  colorPickerTitleColor?: string
+  colorPickerTitleFontSize?: string
+  colorPickerTitleFontWeight?: string
+  colorPickerTitleLineHeight?: string
+  colorPickerTitleMarginBottom?: string
+  colorPickerPresetGap?: string
+  colorPickerPresetColorSize?: string
+  colorPickerPresetColorBorder?: string
+  colorPickerPresetColorBorderActive?: string
+  colorPickerPresetColorShadowActive?: string
+  colorPickerPresetLabelColor?: string
+  colorPickerPresetLabelFontSize?: string
+  colorPickerPresetLabelLineHeight?: string
+  colorPickerPanelMarginTop?: string
+  colorPickerPaletteHeight?: string
+  colorPickerPaletteRadius?: string
+  colorPickerSliderHeight?: string
+  colorPickerSliderRadius?: string
+  colorPickerSliderMarginTop?: string
+  colorPickerControlMarginTop?: string
+  colorPickerControlGap?: string
+  colorPickerPreviewSize?: string
+  colorPickerInputHeight?: string
+  colorPickerInputPadding?: string
+  colorPickerInputColor?: string
+  colorPickerInputFontSize?: string
+  colorPickerInputBg?: string
+  colorPickerInputBorder?: string
+  colorPickerInputRadius?: string
+  colorPickerFormatBg?: string
+  colorPickerFormatRadius?: string
+  colorPickerFormatItemPadding?: string
+  colorPickerFormatItemColor?: string
+  colorPickerFormatItemColorActive?: string
+  colorPickerFormatItemBgActive?: string
+  colorPickerFormatItemFontSize?: string
+  colorPickerFormatItemLineHeight?: string
+  colorPickerThumbSize?: string
+  colorPickerThumbBorder?: string
+  colorPickerThumbShadow?: string
+  colorPickerOpacityDisabled?: string
+}
+
 export type circleThemeVars = {
   circleTextColor?: string // 圆环文字颜色
   circleTextFontSize?: string // 圆环文字字号
@@ -2004,6 +2049,7 @@ export type ConfigProviderThemeVars = baseThemeVars &
   cellGroupThemeVars &
   cellThemeVars &
   checkboxThemeVars &
+  colorPickerThemeVars &
   circleThemeVars &
   collapseItemThemeVars &
   collapseThemeVars &

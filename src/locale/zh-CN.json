@@ -2246,5 +2246,15 @@
   "zuo-shang-jiao": "左上角",
   "zuo-xia": "左下",
   "zuo-you-hua-dong": "左右滑动",
-  "zuo-zhong": "左中"
+  "zuo-zhong": "左中",
+  "colorpicker-title": "ColorPicker 颜色选择器",
+  "xuan-ze-qi-mo-shi": "选择器模式",
+  "yu-she-mo-shi": "预设模式",
+  "ji-chu-mo-shi": "基础模式",
+  "gao-ji-mo-shi": "高级模式",
+  "yan-se-yu-she": "颜色预设",
+  "zi-ding-yi-yan-se": "自定义颜色",
+  "tou-ming-du": "透明度",
+  "wu-tou-ming-du": "无透明度",
+  "dang-qian-yan-se": "当前颜色"
 }

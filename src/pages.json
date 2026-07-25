@@ -141,6 +141,21 @@
           }
         },
         {
+          "path": "colorPicker/Index",
+          "name": "colorPicker",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "ColorPicker 颜色选择器",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "%colorpicker-title%"
+            // #endif
+          }
+        },
+        {
           "path": "layout/Index",
           "name": "layout",
           "style": {

@@ -12,6 +12,7 @@ declare module 'vue' {
     WdCheckbox: typeof import('./components/wd-checkbox/wd-checkbox.vue')['default']
     WdCheckboxGroup: typeof import('./components/wd-checkbox-group/wd-checkbox-group.vue')['default']
     WdCol: typeof import('./components/wd-col/wd-col.vue')['default']
+    WdColorPicker: typeof import('./components/wd-color-picker/wd-color-picker.vue')['default']
     WdCascader: typeof import('./components/wd-cascader/wd-cascader.vue')['default']
     WdCollapse: typeof import('./components/wd-collapse/wd-collapse.vue')['default']
     WdCollapseItem: typeof import('./components/wd-collapse-item/wd-collapse-item.vue')['default']

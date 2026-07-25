@@ -344,6 +344,14 @@ const categories: CatalogCategory[] = [
         }
       },
       {
+        id: 'colorPicker',
+        titleKey: 'colorpicker-title',
+        docs: {
+          'zh-CN': { slug: 'color-picker', text: 'ColorPicker 颜色选择器' },
+          'en-US': { slug: 'color-picker', text: 'ColorPicker' }
+        }
+      },
+      {
         id: 'picker',
         titleKey: 'picker-xuan-ze-qi',
         docs: {

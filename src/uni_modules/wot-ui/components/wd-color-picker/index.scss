@@ -1,0 +1,367 @@
+@use '../../styles/mixin/mixin.scss' as *;
+@use '../../styles/variable.scss' as *;
+
+$color-picker-bg: var(--wot-color-picker-bg, $filled-oppo) !default;
+$color-picker-title-color: var(--wot-color-picker-title-color, $text-main) !default;
+$color-picker-title-font-size: var(--wot-color-picker-title-font-size, $typography-title-size-main) !default;
+$color-picker-title-font-weight: var(--wot-color-picker-title-font-weight, $font-weight-medium) !default;
+$color-picker-title-line-height: var(--wot-color-picker-title-line-height, $typography-title-line-height-size-main) !default;
+$color-picker-title-margin-bottom: var(--wot-color-picker-title-margin-bottom, $spacing-extra-loose) !default;
+$color-picker-popover-width: var(--wot-color-picker-popover-width, 100%) !default;
+$color-picker-popover-padding: var(--wot-color-picker-popover-padding, $padding-loose) !default;
+$color-picker-palette-height: var(--wot-color-picker-palette-height, $n-248) !default;
+$color-picker-palette-radius: var(--wot-color-picker-palette-radius, $radius-large) !default;
+$color-picker-slider-height: var(--wot-color-picker-slider-height, $n-18) !default;
+$color-picker-slider-radius: var(--wot-color-picker-slider-radius, $radius-full) !default;
+$color-picker-slider-margin-top: var(--wot-color-picker-slider-margin-top, $spacing-loose) !default;
+$color-picker-control-margin-top: var(--wot-color-picker-control-margin-top, $spacing-loose) !default;
+$color-picker-control-gap: var(--wot-color-picker-control-gap, $spacing-loose) !default;
+$color-picker-slider-control-margin-top: var(--wot-color-picker-slider-control-margin-top, $spacing-loose) !default;
+$color-picker-slider-control-gap: var(--wot-color-picker-slider-control-gap, $spacing-loose) !default;
+$color-picker-preview-size: var(--wot-color-picker-preview-size, $n-48) !default;
+$color-picker-input-height: var(--wot-color-picker-input-height, $n-36) !default;
+$color-picker-input-padding: var(--wot-color-picker-input-padding, 0 $padding-tight) !default;
+$color-picker-input-gap: var(--wot-color-picker-input-gap, $n-8) !default;
+$color-picker-input-color: var(--wot-color-picker-input-color, $text-main) !default;
+$color-picker-input-font-size: var(--wot-color-picker-input-font-size, $typography-body-size-main) !default;
+$color-picker-input-bg: var(--wot-color-picker-input-bg, $filled-oppo) !default;
+$color-picker-input-border: var(--wot-color-picker-input-border, $stroke-light solid $border-main) !default;
+$color-picker-input-radius: var(--wot-color-picker-input-radius, $radius-main) !default;
+$color-picker-input-label-color: var(--wot-color-picker-input-label-color, $text-placeholder) !default;
+$color-picker-input-label-font-size: var(--wot-color-picker-input-label-font-size, $typography-label-size-main) !default;
+$color-picker-input-label-line-height: var(--wot-color-picker-input-label-line-height, $typography-label-line-height-size-main) !default;
+$color-picker-format-switch-width: var(--wot-color-picker-format-switch-width, 112px) !default;
+$color-picker-format-switch-color: var(--wot-color-picker-format-switch-color, $text-secondary) !default;
+$color-picker-copy-size: var(--wot-color-picker-copy-size, $n-36) !default;
+$color-picker-copy-color: var(--wot-color-picker-copy-color, $text-secondary) !default;
+$color-picker-copy-bg: var(--wot-color-picker-copy-bg, $filled-oppo) !default;
+$color-picker-copy-border: var(--wot-color-picker-copy-border, $stroke-light solid $border-main) !default;
+$color-picker-copy-radius: var(--wot-color-picker-copy-radius, $radius-main) !default;
+$color-picker-quick-list-margin-top: var(--wot-color-picker-quick-list-margin-top, $spacing-loose) !default;
+$color-picker-quick-list-gap: var(--wot-color-picker-quick-list-gap, $n-6) !default;
+$color-picker-quick-color-size: var(--wot-color-picker-quick-color-size, $n-24) !default;
+$color-picker-quick-color-radius: var(--wot-color-picker-quick-color-radius, $radius-main) !default;
+$color-picker-quick-color-border: var(--wot-color-picker-quick-color-border, $stroke-light solid $border-light) !default;
+$color-picker-quick-color-border-active: var(--wot-color-picker-quick-color-border-active, $stroke-bold solid $primary-6) !default;
+$color-picker-quick-color-shadow-active: var(--wot-color-picker-quick-color-shadow-active, inset 0 0 0 $stroke-bold $base-white) !default;
+$color-picker-quick-transparent-size: var(--wot-color-picker-quick-transparent-size, $n-6) !default;
+$color-picker-thumb-size: var(--wot-color-picker-thumb-size, $n-24) !default;
+$color-picker-thumb-border: var(--wot-color-picker-thumb-border, $stroke-bold solid $base-white) !default;
+$color-picker-thumb-shadow: var(--wot-color-picker-thumb-shadow, 0 1px 6px 0 rgba(0, 0, 0, 0.2)) !default;
+$color-picker-opacity-disabled: var(--wot-color-picker-opacity-disabled, $opacity-disabled) !default;
+
+@include b(color-picker) {
+  display: block;
+  width: 100%;
+  background: $color-picker-bg;
+
+  @include e(title) {
+    color: $color-picker-title-color;
+    font-size: $color-picker-title-font-size;
+    font-weight: $color-picker-title-font-weight;
+    line-height: $color-picker-title-line-height;
+    margin-bottom: $color-picker-title-margin-bottom;
+  }
+
+  @include e(custom-panel) {
+    width: $color-picker-popover-width;
+    max-width: calc(100vw - #{$padding-loose} * 2);
+    padding: $color-picker-popover-padding;
+    box-sizing: border-box;
+  }
+
+  @include e(palette) {
+    position: relative;
+    height: $color-picker-palette-height;
+    border-radius: $color-picker-palette-radius;
+    overflow: hidden;
+  }
+
+  @include e(palette-white) {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, $base-white, rgba(255, 255, 255, 0));
+  }
+
+  @include e(palette-black) {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0), $base-black);
+  }
+
+  @include e(palette-thumb) {
+    position: absolute;
+    width: $color-picker-thumb-size;
+    height: $color-picker-thumb-size;
+    border: $color-picker-thumb-border;
+    border-radius: $radius-full;
+    box-shadow: $color-picker-thumb-shadow;
+    box-sizing: border-box;
+    transform: translate(-50%, -50%);
+  }
+
+  @include e(slider) {
+    margin-top: $color-picker-slider-margin-top;
+
+    &.wd-slider--horizontal {
+      height: $color-picker-slider-height;
+    }
+
+    .wd-slider__bar--default,
+    :deep(.wd-slider__bar--default) {
+      height: $color-picker-slider-height;
+      margin: 0;
+      border-radius: $color-picker-slider-radius;
+      overflow: visible;
+    }
+
+    .wd-slider__track,
+    :deep(.wd-slider__track) {
+      top: 0;
+      bottom: 0;
+    }
+
+    .wd-slider__line,
+    :deep(.wd-slider__line) {
+      background: transparent !important;
+    }
+
+    .wd-slider__dot-slider,
+    :deep(.wd-slider__dot-slider) {
+      width: $color-picker-thumb-size;
+      height: $color-picker-thumb-size;
+      border: $color-picker-thumb-border;
+      border-radius: $radius-full;
+      background: $filled-oppo;
+      box-shadow: $color-picker-thumb-shadow;
+
+      .wd-icon,
+      :deep(.wd-icon) {
+        display: none;
+      }
+    }
+
+    @include m(hue) {
+      .wd-slider__bar--default,
+      :deep(.wd-slider__bar--default) {
+        background: linear-gradient(90deg, red, yellow, lime, cyan, blue, magenta, red);
+      }
+    }
+
+    @include m(alpha) {
+      .wd-slider__bar--default,
+      :deep(.wd-slider__bar--default) {
+        background-color: $base-white;
+        background-image: linear-gradient(90deg, var(--wot-color-picker-alpha-start), var(--wot-color-picker-alpha-end)),
+          linear-gradient(45deg, $filled-strong 25%, transparent 25%),
+          linear-gradient(-45deg, $filled-strong 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, $filled-strong 75%),
+          linear-gradient(-45deg, transparent 75%, $filled-strong 75%);
+        background-position: 0 0, 0 0, 0 $n-4, $n-4 calc(0px - #{$n-4}), calc(0px - #{$n-4}) 0;
+        background-size: 100% 100%, $n-8 $n-8, $n-8 $n-8, $n-8 $n-8, $n-8 $n-8;
+      }
+    }
+  }
+
+  @include e(slider-control) {
+    display: flex;
+    align-items: center;
+    gap: $color-picker-slider-control-gap;
+    margin-top: $color-picker-slider-control-margin-top;
+  }
+
+  @include e(slider-list) {
+    flex: 1;
+    min-width: 0;
+
+    .wd-color-picker__slider:first-child {
+      margin-top: 0;
+    }
+  }
+
+  @include e(control) {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $color-picker-control-gap;
+    margin-top: $color-picker-control-margin-top;
+  }
+
+  @include e(preview) {
+    position: relative;
+    width: $color-picker-preview-size;
+    height: $color-picker-preview-size;
+    border-radius: $radius-full;
+    overflow: hidden;
+    flex: 0 0 auto;
+  }
+
+  @include e(preview-bg) {
+    position: absolute;
+    inset: 0;
+    background-color: $base-white;
+    background-image: linear-gradient(45deg, $filled-strong 25%, transparent 25%),
+      linear-gradient(-45deg, $filled-strong 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, $filled-strong 75%),
+      linear-gradient(-45deg, transparent 75%, $filled-strong 75%);
+    background-position: 0 0, 0 $n-4, $n-4 calc(0px - #{$n-4}), calc(0px - #{$n-4}) 0;
+    background-size: $n-8 $n-8;
+  }
+
+  @include e(preview-color) {
+    position: absolute;
+    inset: 0;
+  }
+
+  @include e(field) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @include e(input-wrap) {
+    display: flex;
+    align-items: flex-start;
+    gap: $color-picker-input-gap;
+    min-width: 0;
+  }
+
+  @include e(input-list) {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    gap: $color-picker-input-gap;
+
+    @include when(multiple) {
+      .wd-color-picker__input-item {
+        min-width: 0;
+      }
+    }
+  }
+
+  @include e(input-item) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @include e(input) {
+    width: 100%;
+    height: $color-picker-input-height;
+    padding: $color-picker-input-padding;
+    background: $color-picker-input-bg;
+    border: $color-picker-input-border;
+    border-radius: $color-picker-input-radius;
+    box-sizing: border-box;
+  }
+
+  @include e(input-inner) {
+    color: $color-picker-input-color;
+    font-size: $color-picker-input-font-size;
+    text-align: center;
+  }
+
+  @include e(input-label) {
+    margin-top: $spacing-super-tight;
+    color: $color-picker-input-label-color;
+    font-size: $color-picker-input-label-font-size;
+    line-height: $color-picker-input-label-line-height;
+    text-align: center;
+  }
+
+  @include e(format-switch) {
+    display: flex;
+    flex: 0 0 $color-picker-format-switch-width;
+    width: $color-picker-format-switch-width;
+    height: $color-picker-input-height;
+    align-items: center;
+    justify-content: center;
+    color: $color-picker-format-switch-color;
+    font-size: $color-picker-input-font-size;
+    background: $color-picker-input-bg;
+    border: $color-picker-input-border;
+    border-radius: $color-picker-input-radius;
+    box-sizing: border-box;
+
+    @include when(disabled) {
+      opacity: $color-picker-opacity-disabled;
+    }
+  }
+
+  @include e(format-popover) {
+    flex: 0 0 $color-picker-format-switch-width;
+    width: $color-picker-format-switch-width;
+  }
+
+  @include e(copy) {
+    display: flex;
+    flex: 0 0 $color-picker-copy-size;
+    width: $color-picker-copy-size;
+    height: $color-picker-copy-size;
+    align-items: center;
+    justify-content: center;
+    color: $color-picker-copy-color;
+    background: $color-picker-copy-bg;
+    border: $color-picker-copy-border;
+    border-radius: $color-picker-copy-radius;
+    box-sizing: border-box;
+
+    @include when(disabled) {
+      opacity: $color-picker-opacity-disabled;
+    }
+  }
+
+  @include e(copy-icon) {
+    color: inherit;
+  }
+
+  @include e(quick-list) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax($color-picker-quick-color-size, $color-picker-quick-color-size));
+    gap: $color-picker-quick-list-gap;
+    margin-top: $color-picker-quick-list-margin-top;
+  }
+
+  @include e(quick-color) {
+    width: $color-picker-quick-color-size;
+    height: $color-picker-quick-color-size;
+    border: $color-picker-quick-color-border;
+    box-sizing: border-box;
+
+    @include m(circle) {
+      border-radius: $radius-full;
+    }
+
+    @include m(square) {
+      border-radius: $color-picker-quick-color-radius;
+    }
+
+    @include when(active) {
+      border: $color-picker-quick-color-border-active;
+      box-shadow: $color-picker-quick-color-shadow-active;
+    }
+
+    @include when(disabled) {
+      opacity: $color-picker-opacity-disabled;
+    }
+
+    &.is-transparent {
+      background-color: $base-white !important;
+      background-image: linear-gradient(45deg, $filled-strong 25%, transparent 25%),
+        linear-gradient(-45deg, $filled-strong 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, $filled-strong 75%),
+        linear-gradient(-45deg, transparent 75%, $filled-strong 75%);
+      background-position: 0 0, 0 $color-picker-quick-transparent-size, $color-picker-quick-transparent-size calc(0px - #{$color-picker-quick-transparent-size}),
+        calc(0px - #{$color-picker-quick-transparent-size}) 0;
+      background-size: calc(#{$color-picker-quick-transparent-size} * 2) calc(#{$color-picker-quick-transparent-size} * 2);
+    }
+  }
+
+  @include when(disabled) {
+    opacity: $color-picker-opacity-disabled;
+  }
+
+  @include when(readonly) {
+    .wd-color-picker__custom-panel {
+      pointer-events: none;
+    }
+  }
+}

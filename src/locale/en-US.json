@@ -2246,5 +2246,15 @@
   "zuo-shang-jiao": "upper left corner",
   "zuo-xia": "lower left",
   "zuo-you-hua-dong": "Slide left and right",
-  "zuo-zhong": "Middle Left"
+  "zuo-zhong": "Middle Left",
+  "colorpicker-title": "ColorPicker",
+  "xuan-ze-qi-mo-shi": "Picker Mode",
+  "yu-she-mo-shi": "Preset Mode",
+  "ji-chu-mo-shi": "Basic Mode",
+  "gao-ji-mo-shi": "Advanced Mode",
+  "yan-se-yu-she": "Color Presets",
+  "zi-ding-yi-yan-se": "Custom Color",
+  "tou-ming-du": "Alpha",
+  "wu-tou-ming-du": "Without Alpha",
+  "dang-qian-yan-se": "Current Color"
 }
