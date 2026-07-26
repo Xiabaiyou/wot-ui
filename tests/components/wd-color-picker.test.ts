@@ -179,7 +179,7 @@ describe('WdColorPicker', () => {
   test('rgba 格式会展示通道输入框并支持修改通道值', () => {
     const wrapper = mountColorPicker({
       props: {
-        modelValue: 'rgba(255, 0, 0, 0.5)',
+        modelValue: 'rgba(255, 128, 0, 0.5)',
         format: 'rgba'
       }
     })
@@ -193,6 +193,21 @@ describe('WdColorPicker', () => {
 
     const updates = wrapper.emitted('update:modelValue') as any[]
     expect(updates[0][0]).toBe('rgba(255, 128, 0, 0.5)')
+  })
+
+  test('清空通道输入框后失焦会回滚当前值', () => {
+    const wrapper = mountColorPicker({
+      props: {
+        modelValue: 'rgba(255, 128, 0, 0.5)',
+        format: 'rgba'
+      }
+    })
+
+    ;(wrapper.vm as any).handleChannelInput('g', { detail: { value: '' } })
+    ;(wrapper.vm as any).handleChannelConfirm()
+
+    expect(wrapper.emitted('update:modelValue')).toBeFalsy()
+    expect((wrapper.vm as any).channelInputValues.g).toBe('128')
   })
 
   test('formats 支持自定义可切换格式列表', () => {
@@ -234,24 +249,29 @@ describe('WdColorPicker', () => {
   })
 
   test('点击复制按钮会复制当前颜色值并触发 copy', async () => {
+    const originalSetClipboardData = (uni as any).setClipboardData
     const setClipboardData = vi.fn(({ success }) => success?.())
     ;(uni as any).setClipboardData = setClipboardData
-    const wrapper = mountColorPicker({
-      props: {
-        modelValue: 'rgba(162, 81, 230, 0.92)',
-        format: 'rgba'
-      }
-    })
-
-    await wrapper.find('.wd-color-picker__copy').trigger('click')
-
-    expect(setClipboardData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: 'rgba(162, 81, 230, 0.92)',
-        showToast: false
+    try {
+      const wrapper = mountColorPicker({
+        props: {
+          modelValue: 'rgba(162, 81, 230, 0.92)',
+          format: 'rgba'
+        }
       })
-    )
-    expect(wrapper.emitted('copy')?.[0]).toEqual(['rgba(162, 81, 230, 0.92)'])
+
+      await wrapper.find('.wd-color-picker__copy').trigger('click')
+
+      expect(setClipboardData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: 'rgba(162, 81, 230, 0.92)',
+          showToast: false
+        })
+      )
+      expect(wrapper.emitted('copy')?.[0]).toEqual(['rgba(162, 81, 230, 0.92)'])
+    } finally {
+      ;(uni as any).setClipboardData = originalSetClipboardData
+    }
   })
 
   test('快捷色块默认方形', () => {
@@ -376,6 +396,7 @@ describe('WdColorPicker', () => {
 
     const sliders = wrapper.findAllComponents({ name: 'wd-slider' })
     expect(sliders.length).toBe(2)
+    expect(sliders[1].props('customStyle')).toContain('--wot-slider-bar-bg')
 
     await sliders[0].vm.$emit('update:modelValue', 120)
     await sliders[1].vm.$emit('update:modelValue', 50)

@@ -140,5 +140,13 @@ export default {
   slideVerify: {
     text: 'Slide right to verify',
     successText: 'Verification passed'
+  },
+  colorPicker: {
+    hex: 'HEX',
+    hexa: 'HEXA',
+    rgb: 'RGB',
+    rgba: 'RGBA',
+    hsl: 'HSL',
+    hsla: 'HSLA'
   }
 }

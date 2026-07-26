@@ -12,7 +12,6 @@ $color-picker-popover-padding: var(--wot-color-picker-popover-padding, $padding-
 $color-picker-palette-height: var(--wot-color-picker-palette-height, $n-248) !default;
 $color-picker-palette-radius: var(--wot-color-picker-palette-radius, $radius-large) !default;
 $color-picker-slider-height: var(--wot-color-picker-slider-height, $n-18) !default;
-$color-picker-slider-radius: var(--wot-color-picker-slider-radius, $radius-full) !default;
 $color-picker-slider-margin-top: var(--wot-color-picker-slider-margin-top, $spacing-loose) !default;
 $color-picker-control-margin-top: var(--wot-color-picker-control-margin-top, $spacing-loose) !default;
 $color-picker-control-gap: var(--wot-color-picker-control-gap, $spacing-loose) !default;
@@ -102,65 +101,6 @@ $color-picker-opacity-disabled: var(--wot-color-picker-opacity-disabled, $opacit
 
   @include e(slider) {
     margin-top: $color-picker-slider-margin-top;
-
-    &.wd-slider--horizontal {
-      height: $color-picker-slider-height;
-    }
-
-    .wd-slider__bar--default,
-    :deep(.wd-slider__bar--default) {
-      height: $color-picker-slider-height;
-      margin: 0;
-      border-radius: $color-picker-slider-radius;
-      overflow: visible;
-    }
-
-    .wd-slider__track,
-    :deep(.wd-slider__track) {
-      top: 0;
-      bottom: 0;
-    }
-
-    .wd-slider__line,
-    :deep(.wd-slider__line) {
-      background: transparent !important;
-    }
-
-    .wd-slider__dot-slider,
-    :deep(.wd-slider__dot-slider) {
-      width: $color-picker-thumb-size;
-      height: $color-picker-thumb-size;
-      border: $color-picker-thumb-border;
-      border-radius: $radius-full;
-      background: $filled-oppo;
-      box-shadow: $color-picker-thumb-shadow;
-
-      .wd-icon,
-      :deep(.wd-icon) {
-        display: none;
-      }
-    }
-
-    @include m(hue) {
-      .wd-slider__bar--default,
-      :deep(.wd-slider__bar--default) {
-        background: linear-gradient(90deg, red, yellow, lime, cyan, blue, magenta, red);
-      }
-    }
-
-    @include m(alpha) {
-      .wd-slider__bar--default,
-      :deep(.wd-slider__bar--default) {
-        background-color: $base-white;
-        background-image: linear-gradient(90deg, var(--wot-color-picker-alpha-start), var(--wot-color-picker-alpha-end)),
-          linear-gradient(45deg, $filled-strong 25%, transparent 25%),
-          linear-gradient(-45deg, $filled-strong 25%, transparent 25%),
-          linear-gradient(45deg, transparent 75%, $filled-strong 75%),
-          linear-gradient(-45deg, transparent 75%, $filled-strong 75%);
-        background-position: 0 0, 0 0, 0 $n-4, $n-4 calc(0px - #{$n-4}), calc(0px - #{$n-4}) 0;
-        background-size: 100% 100%, $n-8 $n-8, $n-8 $n-8, $n-8 $n-8, $n-8 $n-8;
-      }
-    }
   }
 
   @include e(slider-control) {
@@ -343,7 +283,7 @@ $color-picker-opacity-disabled: var(--wot-color-picker-opacity-disabled, $opacit
       opacity: $color-picker-opacity-disabled;
     }
 
-    &.is-transparent {
+    @include when(transparent) {
       background-color: $base-white !important;
       background-image: linear-gradient(45deg, $filled-strong 25%, transparent 25%),
         linear-gradient(-45deg, $filled-strong 25%, transparent 25%),

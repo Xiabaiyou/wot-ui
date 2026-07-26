@@ -26,10 +26,12 @@
             v-model="hueValue"
             custom-class="wd-color-picker__slider wd-color-picker__slider--hue"
             :custom-style="sliderCustomStyle"
+            theme="capsule"
             :min="0"
             :max="360"
             :step="1"
             active-color="transparent"
+            inactive-color="linear-gradient(90deg, red, yellow, lime, cyan, blue, magenta, red)"
             popover-visible="never"
             :disabled="disabled || readonly"
           />
@@ -39,6 +41,7 @@
             v-model="alphaValue"
             custom-class="wd-color-picker__slider wd-color-picker__slider--alpha"
             :custom-style="alphaSliderCustomStyle"
+            theme="capsule"
             :min="0"
             :max="100"
             :step="1"
@@ -139,6 +142,7 @@ export default {
 import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue'
 import { getRect, objToStyle, uuid } from '../../common/util'
 import { useParent } from '../../composables/useParent'
+import { useTranslate } from '../../composables/useTranslate'
 import { FORM_ITEM_VALIDATE_KEY } from '../wd-form-item/types'
 import wdIcon from '../wd-icon/wd-icon.vue'
 import wdInput from '../wd-input/wd-input.vue'
@@ -163,6 +167,7 @@ import {
   getInputValue,
   getNumericInputValue,
   getPercentByRect,
+  getTouchPoint,
   hslToRgb,
   hsvToRgb,
   isAlphaFormat,
@@ -195,6 +200,7 @@ const panelId = ref<string>(`wd-color-picker-panel-${uuid()}`)
 const panelRect = ref<UniApp.NodeInfo | null>(null)
 const { proxy } = getCurrentInstance() as any
 const { parent: formItemValidate } = useParent(FORM_ITEM_VALIDATE_KEY)
+const { translate } = useTranslate('colorPicker')
 
 const rootClass = computed(() => {
   const classes = ['wd-color-picker']
@@ -207,13 +213,13 @@ const rootClass = computed(() => {
 const rootStyle = computed(() => props.customStyle)
 
 const COLOR_PICKER_MODES: ColorPickerMode[] = ['basic', 'advanced']
-const FORMAT_LABEL_MAP: Record<ColorPickerFormat, string> = {
-  hex: '十六进制',
-  hexa: '十六进制透明',
-  rgb: 'RGB',
-  rgba: 'RGBA',
-  hsl: 'HSL',
-  hsla: 'HSLA'
+const FORMAT_LABEL_KEY_MAP: Record<ColorPickerFormat, string> = {
+  hex: 'hex',
+  hexa: 'hexa',
+  rgb: 'rgb',
+  rgba: 'rgba',
+  hsl: 'hsl',
+  hsla: 'hsla'
 }
 
 const currentMode = computed<ColorPickerMode>(() => (COLOR_PICKER_MODES.includes(props.mode) ? props.mode : 'advanced'))
@@ -228,7 +234,7 @@ const formatOptions = computed<ColorPickerFormat[]>(() => {
   return formats.length ? formats : defaultFormats
 })
 
-const formatMenuItems = computed<PopoverMenuItem[]>(() => formatOptions.value.map((item) => ({ content: FORMAT_LABEL_MAP[item] })))
+const formatMenuItems = computed<PopoverMenuItem[]>(() => formatOptions.value.map((item) => ({ content: translate(FORMAT_LABEL_KEY_MAP[item]) })))
 
 const currentFormat = computed<ColorPickerFormat>(() =>
   formatOptions.value.includes(activeFormat.value) ? activeFormat.value : formatOptions.value[0]
@@ -236,7 +242,7 @@ const currentFormat = computed<ColorPickerFormat>(() =>
 
 const outputValue = computed(() => formatColor(color.value, currentFormat.value, props.showAlpha))
 
-const activeFormatLabel = computed(() => FORMAT_LABEL_MAP[currentFormat.value])
+const activeFormatLabel = computed(() => translate(FORMAT_LABEL_KEY_MAP[currentFormat.value]))
 
 const hexInputLabel = computed(() => (currentFormat.value === 'hexa' ? 'HEXA' : 'HEX'))
 
@@ -278,11 +284,15 @@ const alphaValue = computed({
 })
 
 const sliderCustomStyle =
-  '--wot-slider-bar-height: var(--wot-color-picker-slider-height, 18px); --wot-slider-dot-size: var(--wot-color-picker-thumb-size, 24px); --wot-slider-dot-bg: var(--wot-filled-oppo, var(--wot-base-white, white)); --wot-slider-dot-shadow: var(--wot-color-picker-thumb-shadow, 0 1px 6px 0 rgba(0, 0, 0, 0.2));'
+  '--wot-slider-bar-height-capsule: var(--wot-color-picker-slider-height, 18px); --wot-slider-line-height-capsule: var(--wot-color-picker-slider-height, 18px); --wot-slider-capsule-track-inset: 0px; --wot-slider-dot-size: var(--wot-color-picker-thumb-size, 24px); --wot-slider-dot-bg: var(--wot-filled-oppo, var(--wot-base-white, white)); --wot-slider-dot-shadow: var(--wot-color-picker-thumb-shadow, 0 1px 6px 0 rgba(0, 0, 0, 0.2));'
+
+const alphaSliderBackground = computed(() => {
+  const rgb = hsvToRgb({ ...color.value, a: 1 })
+  return `linear-gradient(90deg, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0), rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)), repeating-conic-gradient(var(--wot-filled-strong, #ebedf0) 0 25%, var(--wot-base-white, #fff) 0 50%) 0 0 / 8px 8px`
+})
 
 const alphaSliderCustomStyle = computed(() => {
-  const rgb = hsvToRgb({ ...color.value, a: 1 })
-  return `${sliderCustomStyle} --wot-color-picker-alpha-start: rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0); --wot-color-picker-alpha-end: rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1);`
+  return `${sliderCustomStyle} --wot-slider-bar-bg: ${alphaSliderBackground.value};`
 })
 
 const previewStyle = computed(() => objToStyle({ background: outputValue.value }))
@@ -419,24 +429,28 @@ function handleChannelInput(key: string, event: any) {
 function handleChannelConfirm() {
   if (isDisabled()) return
 
-  const getValue = (key: string) => Number(channelInputValues.value[key])
-  const alpha = Number.isNaN(getValue('a')) ? color.value.a : clamp(getValue('a'), 0, 1)
+  const getValue = (key: string) => {
+    const value = channelInputValues.value[key]
+    return value === undefined || value === '' ? null : Number(value)
+  }
+  const alphaValue = getValue('a')
+  const alpha = alphaValue === null || Number.isNaN(alphaValue) ? color.value.a : clamp(alphaValue, 0, 1)
 
   if (isRgbFormat(currentFormat.value)) {
     const r = getValue('r')
     const g = getValue('g')
     const b = getValue('b')
 
-    if ([r, g, b].some((item) => Number.isNaN(item))) {
+    if ([r, g, b].some((item) => item === null || Number.isNaN(item))) {
       syncChannelInputValues()
       return
     }
 
     updateColor(
       rgbToHsv({
-        r: clamp(Math.round(r), 0, 255),
-        g: clamp(Math.round(g), 0, 255),
-        b: clamp(Math.round(b), 0, 255),
+        r: clamp(Math.round(r as number), 0, 255),
+        g: clamp(Math.round(g as number), 0, 255),
+        b: clamp(Math.round(b as number), 0, 255),
         a: currentFormat.value === 'rgba' ? alpha : color.value.a
       })
     )
@@ -447,7 +461,7 @@ function handleChannelConfirm() {
   const s = getValue('s')
   const l = getValue('l')
 
-  if ([h, s, l].some((item) => Number.isNaN(item))) {
+  if ([h, s, l].some((item) => item === null || Number.isNaN(item))) {
     syncChannelInputValues()
     return
   }
@@ -455,9 +469,9 @@ function handleChannelConfirm() {
   updateColor(
     rgbToHsv(
       hslToRgb({
-        h: clamp(Math.round(h), 0, 360),
-        s: clamp(Math.round(s), 0, 100),
-        l: clamp(Math.round(l), 0, 100),
+        h: clamp(Math.round(h as number), 0, 360),
+        s: clamp(Math.round(s as number), 0, 100),
+        l: clamp(Math.round(l as number), 0, 100),
         a: currentFormat.value === 'hsla' ? alpha : color.value.a
       })
     )
@@ -497,8 +511,9 @@ function updateDragValue(type: ColorPickerDragType, event: any) {
 
 async function handleDragStart(type: ColorPickerDragType, event: any) {
   if (isDisabled()) return
+  const point = getTouchPoint(event)
   await updateRect()
-  updateDragValue(type, event)
+  updateDragValue(type, point)
 }
 
 function handleDragMove(type: ColorPickerDragType, event: any) {

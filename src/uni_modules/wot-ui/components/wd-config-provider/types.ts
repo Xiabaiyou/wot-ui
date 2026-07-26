@@ -804,38 +804,43 @@ export type colorPickerThemeVars = {
   colorPickerTitleFontWeight?: string
   colorPickerTitleLineHeight?: string
   colorPickerTitleMarginBottom?: string
-  colorPickerPresetGap?: string
-  colorPickerPresetColorSize?: string
-  colorPickerPresetColorBorder?: string
-  colorPickerPresetColorBorderActive?: string
-  colorPickerPresetColorShadowActive?: string
-  colorPickerPresetLabelColor?: string
-  colorPickerPresetLabelFontSize?: string
-  colorPickerPresetLabelLineHeight?: string
-  colorPickerPanelMarginTop?: string
+  colorPickerPopoverWidth?: string
+  colorPickerPopoverPadding?: string
   colorPickerPaletteHeight?: string
   colorPickerPaletteRadius?: string
   colorPickerSliderHeight?: string
-  colorPickerSliderRadius?: string
   colorPickerSliderMarginTop?: string
   colorPickerControlMarginTop?: string
   colorPickerControlGap?: string
+  colorPickerSliderControlMarginTop?: string
+  colorPickerSliderControlGap?: string
   colorPickerPreviewSize?: string
   colorPickerInputHeight?: string
   colorPickerInputPadding?: string
+  colorPickerInputGap?: string
   colorPickerInputColor?: string
   colorPickerInputFontSize?: string
   colorPickerInputBg?: string
   colorPickerInputBorder?: string
   colorPickerInputRadius?: string
-  colorPickerFormatBg?: string
-  colorPickerFormatRadius?: string
-  colorPickerFormatItemPadding?: string
-  colorPickerFormatItemColor?: string
-  colorPickerFormatItemColorActive?: string
-  colorPickerFormatItemBgActive?: string
-  colorPickerFormatItemFontSize?: string
-  colorPickerFormatItemLineHeight?: string
+  colorPickerInputLabelColor?: string
+  colorPickerInputLabelFontSize?: string
+  colorPickerInputLabelLineHeight?: string
+  colorPickerFormatSwitchWidth?: string
+  colorPickerFormatSwitchColor?: string
+  colorPickerCopySize?: string
+  colorPickerCopyColor?: string
+  colorPickerCopyBg?: string
+  colorPickerCopyBorder?: string
+  colorPickerCopyRadius?: string
+  colorPickerQuickListMarginTop?: string
+  colorPickerQuickListGap?: string
+  colorPickerQuickColorSize?: string
+  colorPickerQuickColorRadius?: string
+  colorPickerQuickColorBorder?: string
+  colorPickerQuickColorBorderActive?: string
+  colorPickerQuickColorShadowActive?: string
+  colorPickerQuickTransparentSize?: string
   colorPickerThumbSize?: string
   colorPickerThumbBorder?: string
   colorPickerThumbShadow?: string

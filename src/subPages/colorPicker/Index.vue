@@ -4,13 +4,13 @@
       <demo-group :title="$t('zu-jian-lei-xing')">
         <demo-group-item :title="$t('ji-chu-mo-shi')">
           <wd-color-picker v-model="basicModeColor" mode="basic" format="rgba" />
-          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}：{{ basicModeColor }}</view>
+          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}: {{ basicModeColor }}</view>
         </demo-group-item>
         <demo-group-item :title="$t('gao-ji-mo-shi')">
           <wd-color-picker v-model="advancedModeColor" mode="advanced" format="rgba" />
-          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}：{{ advancedModeColor }}</view>
+          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}: {{ advancedModeColor }}</view>
         </demo-group-item>
-        <demo-group-item title="选择主题色">
+        <demo-group-item :title="$t('xuan-ze-zhu-ti-se')">
           <view class="page-color-picker__preset-list">
             <view
               v-for="item in externalPresets"
@@ -20,21 +20,21 @@
               @click="handlePresetClick(item.value)"
             >
               <view class="page-color-picker__preset-color" :style="{ backgroundColor: item.value }"></view>
-              <view class="page-color-picker__preset-label">{{ item.label }}</view>
+              <view class="page-color-picker__preset-label">{{ $t(item.label) }}</view>
             </view>
             <view class="page-color-picker__preset" :class="{ 'is-active': showPresetPicker }" @click="handleCustomPresetClick">
               <view class="page-color-picker__preset-color page-color-picker__preset-color--custom">
                 <view class="page-color-picker__preset-custom-line"></view>
               </view>
-              <view class="page-color-picker__preset-label">自定义</view>
+              <view class="page-color-picker__preset-label">{{ $t('zi-ding-yi-zhu-ti-se') }}</view>
             </view>
           </view>
           <wd-color-picker v-if="showPresetPicker" v-model="presetColor" />
-          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}：{{ presetColor }}</view>
+          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}: {{ presetColor }}</view>
         </demo-group-item>
         <demo-group-item :title="$t('zi-ding-yi-yan-se')">
           <wd-color-picker v-model="customColor" format="rgba" />
-          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}：{{ customColor }}</view>
+          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}: {{ customColor }}</view>
         </demo-group-item>
         <demo-group-item :title="$t('zi-ding-yi-chu-fa-qi')">
           <view class="page-color-picker__trigger" @click="showTriggerPicker = !showTriggerPicker">
@@ -42,7 +42,7 @@
             <view class="page-color-picker__trigger-text">{{ triggerColor }}</view>
           </view>
           <wd-color-picker v-if="showTriggerPicker" v-model="triggerColor" format="rgba" />
-          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}：{{ triggerColor }}</view>
+          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}: {{ triggerColor }}</view>
         </demo-group-item>
       </demo-group>
 
@@ -55,7 +55,7 @@
       <demo-group :title="$t('zu-jian-yang-shi')">
         <demo-group-item :title="$t('wu-tou-ming-du')">
           <wd-color-picker v-model="hexColor" :show-alpha="false" />
-          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}：{{ hexColor }}</view>
+          <view class="page-color-picker__value">{{ $t('dang-qian-yan-se') }}: {{ hexColor }}</view>
         </demo-group-item>
       </demo-group>
     </view>
@@ -75,12 +75,12 @@ const triggerColor = ref('rgba(47, 101, 246, 0.9)')
 const disabledColor = ref('#8a2be2')
 const hexColor = ref('#f45ca8')
 const externalPresets = [
-  { label: '默认蓝', value: '#2f65f6' },
-  { label: '活力橙', value: '#ff7a00' },
-  { label: '薄荷绿', value: '#28c76f' },
-  { label: '樱花粉', value: '#f45ca8' },
-  { label: '紫罗兰', value: '#8a2be2' },
-  { label: '朱砂红', value: '#ff4757' }
+  { label: 'mo-ren-lan', value: '#2f65f6' },
+  { label: 'huo-li-cheng', value: '#ff7a00' },
+  { label: 'bo-he-lv', value: '#28c76f' },
+  { label: 'ying-hua-fen', value: '#f45ca8' },
+  { label: 'zi-luo-lan', value: '#8a2be2' },
+  { label: 'zhu-sha-hong', value: '#ff4757' }
 ]
 
 function handlePresetClick(value: string) {

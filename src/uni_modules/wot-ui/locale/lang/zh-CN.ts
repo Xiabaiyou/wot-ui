@@ -144,5 +144,13 @@ export default {
   slideVerify: {
     text: '向右滑动验证',
     successText: '验证通过'
+  },
+  colorPicker: {
+    hex: '十六进制',
+    hexa: '十六进制透明',
+    rgb: 'RGB',
+    rgba: 'RGBA',
+    hsl: 'HSL',
+    hsla: 'HSLA'
   }
 }

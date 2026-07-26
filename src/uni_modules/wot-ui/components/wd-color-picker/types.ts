@@ -189,7 +189,7 @@ export type ColorPickerEmits = {
  */
 export type ColorPickerExpose = {
   /** 重新测量面板尺寸 */
-  updateRect: () => void
+  updateRect: () => Promise<void>
 }
 
 export type ColorPickerProps = ExtractPropTypes<typeof colorPickerProps>
