@@ -232,7 +232,7 @@ When both `prefix-icon` and `suffix-icon` use CSS icons, it is recommended to se
 | hide-asterisk | Whether to hide required asterisk | boolean | false | - |
 | ellipsis | Whether to truncate content with ellipsis when exceeding | boolean | false | - |
 | use-title-slot | Whether to enable title slot | boolean | true | - |
-| use-label-slot | Whether to enable label slot | boolean | true | $LOWEST_VERSION$ |
+| use-label-slot | Whether to enable label slot | boolean | true | 2.3.0 |
 | custom-class | Root node custom class name | string | `''` | - |
 | custom-style | Root node custom style | string | `''` | - |
 | custom-prefix-class | Leading icon custom style class | string | `''` | - |
