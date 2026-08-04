@@ -1,6 +1,13 @@
 # 更新日志 
 
 
+### [2.3.1](https://github.com/wot-ui/wot-ui/compare/v2.3.0...v2.3.1) (2026-08-04)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 移除 qr-code 的 CommonJS 导出，避免覆盖 vendor 模块 ([#130](https://github.com/wot-ui/wot-ui/issues/130)) ([cf2c892](https://github.com/wot-ui/wot-ui/commit/cf2c8926bc97b629d33e07eb185db887f9a85532))
+
 ## [2.3.0](https://github.com/wot-ui/wot-ui/compare/v2.2.0...v2.3.0) (2026-08-03)
 
 
