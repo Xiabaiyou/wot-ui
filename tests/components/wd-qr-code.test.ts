@@ -1,9 +1,16 @@
 import { mount } from '@vue/test-utils'
 import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import WdQrCode from '@/uni_modules/wot-ui/components/wd-qr-code/wd-qr-code.vue'
-import { generateQRCode, QRErrorCorrectLevel } from '@/uni_modules/wot-ui/components/wd-qr-code/qrcode.js'
+import { generateQRCode, QRRSBlock, QRErrorCorrectLevel } from '@/uni_modules/wot-ui/components/wd-qr-code/qrcode.js'
+
+const require = createRequire(import.meta.url)
+const ReferenceQRCode = require(resolve('node_modules/.pnpm/qrcode-terminal@0.12.0/node_modules/qrcode-terminal/vendor/QRCode'))
+const ReferenceQRErrorCorrectLevel = require(resolve(
+  'node_modules/.pnpm/qrcode-terminal@0.12.0/node_modules/qrcode-terminal/vendor/QRCode/QRErrorCorrectLevel'
+))
 
 const drawMock = vi.fn()
 const createLinearGradientMock = vi.fn(() => ({
@@ -39,6 +46,25 @@ function getExpectedCanvasSize(size: number) {
   return size * (shouldUsePixelRatio ? uni.getSystemInfoSync().pixelRatio || 1 : 1)
 }
 
+function expectQRCodeMatrixToMatchReference(text: string, level: keyof typeof QRErrorCorrectLevel) {
+  const result = generateQRCode(text, {
+    errorCorrectLevel: QRErrorCorrectLevel[level]
+  })
+  const reference = new ReferenceQRCode(-1, ReferenceQRErrorCorrectLevel[level])
+
+  reference.addData(text)
+  reference.make()
+
+  expect(result.typeNumber).toBe(reference.typeNumber)
+  expect(result.moduleCount).toBe(reference.getModuleCount())
+
+  for (let row = 0; row < result.moduleCount; row++) {
+    for (let col = 0; col < result.moduleCount; col++) {
+      expect(result.modules[row][col]).toBe(reference.isDark(row, col))
+    }
+  }
+}
+
 beforeAll(() => {
   ;(globalThis as any).uni = {
     ...(globalThis as any).uni,
@@ -57,6 +83,65 @@ beforeEach(() => {
 })
 
 describe('WdQrCode', () => {
+  test('generates valid version 5 QRCode for UUID with H correction level', () => {
+    const text = '66d1a39d-7535-41bc-9a5b-469715a1a38e'
+    const result = generateQRCode(text, {
+      errorCorrectLevel: QRErrorCorrectLevel.H
+    })
+    const rsBlocks = QRRSBlock.getRSBlocks(result.typeNumber, result.errorCorrectLevel)
+
+    expect(result.typeNumber).toBe(5)
+    expect(result.moduleCount).toBe(37)
+    expect(rsBlocks).toHaveLength(4)
+    expect(rsBlocks.reduce((total, block) => total + block.totalCount, 0)).toBe(134)
+  })
+
+  test('matches reference matrix for ASCII content across correction levels', () => {
+    const cases = [
+      'https://wot-ui.cn',
+      'https://wot-ui.cn/component/qr-code.html',
+      'https://example.com/path/to/page?foo=bar&baz=qux#section-2',
+      'https://api.example.com/pay?id=66d1a39d-7535-41bc-9a5b-469715a1a38e&amount=128.50&currency=CNY',
+      'mailto:support@example.com?subject=wot-ui-qr-code',
+      'tel:+8613800138000',
+      'WIFI:T:WPA;S:wot-ui-demo;P:pa55word123;;',
+      '{"id":"66d1a39d-7535-41bc-9a5b-469715a1a38e","scope":"qr-code","enabled":true}',
+      'ORDER-20260805-000001|USER-10086|AMOUNT-128.50',
+      'otpauth://totp/WotUI:demo@example.com?secret=JBSWY3DPEHPK3PXP&issuer=WotUI',
+      '66d1a39d-7535-41bc-9a5b-469715a1a38e',
+      'a'.repeat(100),
+      '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    ]
+    const levels: Array<keyof typeof QRErrorCorrectLevel> = ['L', 'M', 'Q', 'H']
+
+    cases.forEach((text) => {
+      levels.forEach((level) => {
+        expectQRCodeMatrixToMatchReference(text, level)
+      })
+    })
+  })
+
+  test('generates stable UTF-8 matrices for non-ASCII content', () => {
+    const cases = [
+      { text: '中文二维码', expectedTypes: { L: 2, M: 2, Q: 2, H: 3 } },
+      { text: '😀'.repeat(10), expectedTypes: { L: 3, M: 4, Q: 4, H: 5 } }
+    ]
+    const levels: Array<keyof typeof QRErrorCorrectLevel> = ['L', 'M', 'Q', 'H']
+
+    cases.forEach(({ text, expectedTypes }) => {
+      levels.forEach((level) => {
+        const result = generateQRCode(text, {
+          errorCorrectLevel: QRErrorCorrectLevel[level]
+        })
+
+        expect(result.typeNumber).toBe(expectedTypes[level])
+        expect(result.moduleCount).toBe(result.typeNumber * 4 + 17)
+        expect(result.modules).toHaveLength(result.moduleCount)
+        expect(result.modules.every((row) => row.length === result.moduleCount)).toBe(true)
+      })
+    })
+  })
+
   test('二维码算法使用 ESM 命名导出', () => {
     const result = generateQRCode('https://wot-ui.cn', {
       errorCorrectLevel: QRErrorCorrectLevel.M
