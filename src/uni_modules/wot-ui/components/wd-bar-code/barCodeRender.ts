@@ -115,9 +115,7 @@ function setTextStyle(context: UniApp.CanvasContext, options: BarCodeRenderOptio
 }
 
 function getTextY(barcodeY: number, barHeight: number, options: BarCodeRenderOptions) {
-  return options.textPosition === 'top'
-    ? options.marginTop + options.fontSize - options.textMargin
-    : barcodeY + barHeight + options.textMargin + options.fontSize
+  return options.textPosition === 'top' ? options.marginTop + options.fontSize : barcodeY + barHeight + options.textMargin + options.fontSize
 }
 
 function drawGenericText(

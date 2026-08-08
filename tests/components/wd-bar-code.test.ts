@@ -198,6 +198,23 @@ describe('WdBarCode', () => {
     expect(normalBar[3]).toBe(58)
   })
 
+  test('top text baseline does not subtract textMargin', async () => {
+    const wrapper = mount(WdBarCode, {
+      props: {
+        value: '12345',
+        textPosition: 'top',
+        marginTop: 4,
+        fontSize: 16,
+        textMargin: 10
+      }
+    })
+
+    await waitForDraw(wrapper)
+
+    const context = getLastCanvasContextMock()
+    expect(context.fillText).toHaveBeenCalledWith('12345', 100, 20)
+  })
+
   test('UPC guard bar 不会覆盖底部数字区域', async () => {
     vi.mocked(JsBarcode).mockImplementation(
       (
