@@ -14,6 +14,25 @@
             <wd-bar-code :value="item.value" :format="item.format" />
           </view>
         </demo-group-item>
+
+        <demo-group-item :title="$t('bar-code-dao-chu-tu-pian')">
+          <view class="page-bar-code__item">
+            <wd-bar-code ref="exportBarCodeRef" value="1234567890" />
+            <wd-button class="page-bar-code__export" icon="download" size="small" @click="handleExportImage">
+              {{ $t('bar-code-dao-chu-tu-pian') }}
+            </wd-button>
+            <wd-img
+              v-if="exportImageSrc"
+              class="page-bar-code__export-image"
+              width="200"
+              height="100"
+              mode="aspectFit"
+              :src="exportImageSrc"
+              :show-loading="false"
+              :show-error="false"
+            />
+          </view>
+        </demo-group-item>
       </demo-group>
 
       <demo-group :title="$t('zu-jian-bian-ti')">
@@ -50,13 +69,41 @@
 
         <demo-group-item :title="$t('bar-code-zi-ding-yi-chi-cun')">
           <view class="page-bar-code__item">
-            <wd-bar-code value="1234567890" :width="4" :height="80" />
+            <wd-bar-code value="1234567890" :width="260" :height="80" />
+          </view>
+          <view class="page-bar-code__item">
+            <view class="page-bar-code__label">{{ $t('bar-code-chang-tiao-jin-cou') }}</view>
+            <wd-bar-code value="1234567890" :width="320" :height="50" />
+          </view>
+          <view class="page-bar-code__item">
+            <view class="page-bar-code__label">{{ $t('bar-code-geng-gao-de-tiao-ma') }}</view>
+            <wd-bar-code value="1234567890" :height="140" />
+          </view>
+          <view class="page-bar-code__item">
+            <view class="page-bar-code__label">{{ $t('bar-code-jin-cou-chi-cun') }}</view>
+            <wd-bar-code value="1234567890" :height="60" :display-value="false" />
+          </view>
+        </demo-group-item>
+
+        <demo-group-item :title="$t('bar-code-shu-zi-da-xiao')">
+          <view class="page-bar-code__item">
+            <view class="page-bar-code__label">font-size: 14</view>
+            <wd-bar-code value="1234567890" :font-size="14" />
+          </view>
+          <view class="page-bar-code__item">
+            <view class="page-bar-code__label">font-size: 24</view>
+            <wd-bar-code value="1234567890" :font-size="24" />
           </view>
         </demo-group-item>
 
         <demo-group-item :title="$t('bar-code-zi-ti-yang-shi')">
           <view class="page-bar-code__item">
+            <view class="page-bar-code__label">bold italic</view>
             <wd-bar-code value="1234567890" font-options="bold italic" />
+          </view>
+          <view class="page-bar-code__item">
+            <view class="page-bar-code__label">font-size: 18 + bold</view>
+            <wd-bar-code value="1234567890" :font-size="18" font-options="bold" />
           </view>
         </demo-group-item>
       </demo-group>
@@ -68,19 +115,35 @@
             <wd-bar-code :value="item.value" :format="item.format" />
           </view>
         </demo-group-item>
+
+        <demo-group-item :title="$t('bar-code-te-shu-ge-shi-chi-cun')">
+          <view v-for="item in specialSizeItems" :key="item.label" class="page-bar-code__item">
+            <view class="page-bar-code__label">{{ item.label }}</view>
+            <wd-bar-code :value="item.value" :format="item.format" :width="item.width" :height="item.height" />
+          </view>
+        </demo-group-item>
       </demo-group>
     </view>
   </page-wraper>
 </template>
 
 <script lang="ts" setup>
-import type { BarCodeFormat } from '@/uni_modules/wot-ui/components/wd-bar-code/types'
+import { ref } from 'vue'
+import type { BarCodeFormat, BarCodeInstance } from '@/uni_modules/wot-ui/components/wd-bar-code/types'
 
 type FormatItem = {
   label: string
   value: string
   format: BarCodeFormat
 }
+
+type SizeFormatItem = FormatItem & {
+  width: number
+  height: number
+}
+
+const exportBarCodeRef = ref<BarCodeInstance | null>(null)
+const exportImageSrc = ref('')
 
 const commonFormatItems = [
   { label: 'EAN13', value: '690123456789', format: 'EAN13' },
@@ -107,6 +170,19 @@ const allFormatItems = [
   { label: 'pharmacode', value: '1234', format: 'pharmacode' },
   { label: 'codabar', value: 'A123456A', format: 'codabar' }
 ] as const satisfies readonly FormatItem[]
+
+const specialSizeItems = [
+  { label: 'EAN8', value: '1234567', format: 'EAN8', width: 240, height: 140 },
+  { label: 'UPC', value: '12345678901', format: 'UPC', width: 280, height: 150 },
+  { label: 'UPCE', value: '123456', format: 'UPCE', width: 220, height: 130 }
+] as const satisfies readonly SizeFormatItem[]
+
+async function handleExportImage() {
+  const imagePath = await exportBarCodeRef.value?.exportImage()
+  if (imagePath) {
+    exportImageSrc.value = imagePath
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -126,6 +202,14 @@ const allFormatItems = [
     color: $text-secondary;
     font-size: $typography-body-size-main;
     line-height: $typography-body-line-height-size-main;
+  }
+
+  &__export {
+    margin-top: $spacing-tight;
+  }
+
+  &__export-image {
+    margin-top: $spacing-tight;
   }
 }
 </style>

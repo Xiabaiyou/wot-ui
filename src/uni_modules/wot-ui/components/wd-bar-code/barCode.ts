@@ -1,4 +1,5 @@
 /* eslint-disable */
+// @ts-nocheck
 /******/ var JsBarcode = (function (modules) {
   // webpackBootstrap
   /******/ // The module cache

@@ -4,7 +4,7 @@
     <canvas v-if="canvasVisible" :id="canvasId" :canvas-id="canvasId" type="2d" :style="canvasStyle" />
     <!-- #endif -->
     <!-- #ifndef MP-WEIXIN -->
-    <canvas v-if="canvasVisible" :canvas-id="canvasId" :id="canvasId" :style="canvasStyle" />
+    <canvas v-if="canvasVisible" :canvas-id="canvasId" :id="canvasId" :width="canvasRealWidth" :height="canvasRealHeight" :style="canvasStyle" />
     <!-- #endif -->
   </view>
 </template>
@@ -23,10 +23,18 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, getCurrentInstance, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue'
+import { computed, getCurrentInstance, nextTick, onBeforeMount, onMounted, ref, toRaw, watch } from 'vue'
 import { getSystemInfo, isDef, objToStyle, uuid } from '../../common/util'
-import JsBarcode from './barCode.js'
-import { barCodeProps, isValidBarCodeFormat, MAX_BAR_CODE_VALUE_LENGTH, type BarCodeFormat } from './types'
+import JsBarcode from './barCode'
+import { drawBarCodeToCanvas, resolveBarCodeRenderSize, type BarCodeRenderEncoding, type BarCodeRenderOptions } from './barCodeRender'
+import {
+  barCodeProps,
+  DEFAULT_BAR_CODE_LINE_WIDTH,
+  isValidBarCodeFormat,
+  MAX_BAR_CODE_VALUE_LENGTH,
+  type BarCodeExpose,
+  type BarCodeFormat
+} from './types'
 // #ifdef MP-WEIXIN
 import { canvas2dAdapter } from '../../common/canvasHelper'
 // #endif
@@ -59,6 +67,14 @@ const canvasStyle = computed(() =>
     height: `${canvasHeight.value}px`
   })
 )
+
+const canvasRealWidth = computed(() => {
+  return canvasWidth.value
+})
+
+const canvasRealHeight = computed(() => {
+  return canvasHeight.value
+})
 
 const canvasVisible = computed(() => hasBarCodeValue(props.value))
 
@@ -131,7 +147,43 @@ function resetCanvasContext() {
   // #endif
 }
 
+// #ifdef MP-WEIXIN
+function barcodeCanvas2dAdapter(rawCtx: CanvasRenderingContext2D) {
+  const context = canvas2dAdapter(rawCtx) as UniApp.CanvasContext & { font?: string }
+
+  context.setFontSize = (fontSize: number | string) => {
+    const size = typeof fontSize === 'number' ? `${fontSize}px` : fontSize
+    const font = rawCtx.font || ''
+    rawCtx.font = /\d+(?:\.\d+)?px/.test(font) ? font.replace(/\d+(?:\.\d+)?px/, size) : `${size} sans-serif`
+  }
+
+  return context
+}
+// #endif
+
 let drawTask: Promise<void> = Promise.resolve()
+
+type ResolvedBarCodeOptions = {
+  format: BarCodeFormat
+  width: number
+  height: number
+  text?: string
+  font: string
+  fontSize: number
+  fontOptions: string
+  textMargin: number
+  background: string
+  lineColor: string
+  margin: number
+  marginTop: number
+  marginBottom: number
+  marginLeft: number
+  marginRight: number
+  displayValue: boolean
+  textAlign: string
+  textPosition: string
+  valid: (valid: boolean) => void
+}
 
 /**
  * 合并同一帧内的重复绘制请求
@@ -145,30 +197,51 @@ function requestDraw() {
     })
 }
 
+function flushCanvas(context: UniApp.CanvasContext) {
+  return new Promise<void>((resolve) => {
+    let settled = false
+    const done = () => {
+      if (settled) return
+      settled = true
+      resolve()
+    }
+
+    try {
+      context.draw?.(false, done)
+    } catch (error) {
+      void error
+      context.draw?.(false)
+    }
+
+    setTimeout(done, 16)
+  })
+}
+
 /**
  * 获取 canvas 上下文
  */
 function getContext() {
   return new Promise<UniApp.CanvasContext | null>((resolve) => {
-    if (!proxy) {
-      resolve(null)
-      return
-    }
-
     if (ctx) {
       resolve(ctx)
       return
     }
 
     // #ifndef MP-WEIXIN
-    ctx = uni.createCanvasContext(canvasId.value, proxy)
+    if (!proxy) {
+      resolve(null)
+      return
+    }
+    const alipay = (globalThis as any).my
+    ctx = alipay?.createCanvasContext ? alipay.createCanvasContext(canvasId.value) : uni.createCanvasContext(canvasId.value, proxy)
     resolve(ctx)
     // #endif
 
     // #ifdef MP-WEIXIN
-    uni
-      .createSelectorQuery()
-      .in(proxy)
+    const query = uni.createSelectorQuery()
+    const scopedQuery = proxy && query.in ? query.in(proxy) : query
+
+    scopedQuery
       .select(`#${canvasId.value}`)
       .node((res) => {
         if (!res?.node) {
@@ -176,14 +249,17 @@ function getContext() {
           return
         }
 
-        canvasNode = res.node
-        const rawCtx = canvasNode.getContext('2d') as CanvasRenderingContext2D
+        const node = res.node as WechatMiniprogram.Canvas
+        canvasNode = node
+        const rawCtx = node.getContext('2d') as unknown as CanvasRenderingContext2D
         if (!rawCtx) {
           resolve(null)
           return
         }
 
-        ctx = canvas2dAdapter(rawCtx)
+        const dpr = uni.getWindowInfo ? uni.getWindowInfo().pixelRatio : uni.getSystemInfoSync().pixelRatio
+        pixelRatio.value = dpr || 1
+        ctx = barcodeCanvas2dAdapter(rawCtx)
         resolve(ctx)
       })
       .exec()
@@ -196,51 +272,47 @@ function getContext() {
  */
 function applyCanvasNodeSize() {
   // #ifdef MP-WEIXIN
-  if (!canvasNode) return
+  const node = canvasNode
+  if (!node) return
 
   const width = canvasWidth.value
   const height = canvasHeight.value
   if (width <= 0 || height <= 0) return
 
   const ratio = pixelRatio.value
-  canvasNode.width = Math.ceil(width * ratio)
-  canvasNode.height = Math.ceil(height * ratio)
+  node.width = Math.ceil(width * ratio)
+  node.height = Math.ceil(height * ratio)
 
-  const rawCtx = canvasNode.getContext('2d') as CanvasRenderingContext2D
+  const rawCtx = node.getContext('2d') as unknown as CanvasRenderingContext2D
   rawCtx.setTransform(ratio, 0, 0, ratio, 0, 0)
-  ctx = canvas2dAdapter(rawCtx)
+  ctx = barcodeCanvas2dAdapter(rawCtx)
   // #endif
 }
 
 /**
- * 构建 JsBarcode 所需的 canvas 包装对象
+ * 等待 canvas 节点尺寸更新。
  */
-function createCanvasWrapper(context: UniApp.CanvasContext) {
-  return {
-    getContext: () => {
-      // #ifdef MP-WEIXIN
-      if (canvasNode) {
-        const rawCtx = canvasNode.getContext('2d') as CanvasRenderingContext2D
-        return canvas2dAdapter(rawCtx)
-      }
-      // #endif
-      return context
-    },
-    set width(width: number) {
-      canvasWidth.value = width
-      applyCanvasNodeSize()
-    },
-    set height(height: number) {
-      canvasHeight.value = height
-      applyCanvasNodeSize()
-    },
-    get width() {
-      return canvasWidth.value
-    },
-    get height() {
-      return canvasHeight.value
-    }
-  }
+function waitCanvasUpdated() {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, 0)
+  })
+}
+
+function getResolvedMargin(value: number | undefined) {
+  return value ?? props.margin
+}
+
+function getDisplayText() {
+  return props.text || String(props.value)
+}
+
+function createBarCodeEncodings(barcodeValue: string, options: ResolvedBarCodeOptions) {
+  const encoded: { encodings?: BarCodeRenderEncoding[] } = {}
+  const encodeOptions: Record<string, unknown> = { ...options, width: DEFAULT_BAR_CODE_LINE_WIDTH }
+
+  JsBarcode(encoded, barcodeValue, encodeOptions)
+
+  return encoded.encodings || []
 }
 
 /**
@@ -284,9 +356,9 @@ async function renderBarCode() {
     return
   }
 
-  const options: Record<string, unknown> = {
+  const options: ResolvedBarCodeOptions = {
     format,
-    width: props.width,
+    width: DEFAULT_BAR_CODE_LINE_WIDTH,
     height: props.height,
     text: props.text || undefined,
     font: props.font,
@@ -296,10 +368,10 @@ async function renderBarCode() {
     background: props.background,
     lineColor: props.lineColor,
     margin: props.margin,
-    marginTop: props.marginTop,
-    marginBottom: props.marginBottom,
-    marginLeft: props.marginLeft,
-    marginRight: props.marginRight,
+    marginTop: getResolvedMargin(props.marginTop),
+    marginBottom: getResolvedMargin(props.marginBottom),
+    marginLeft: getResolvedMargin(props.marginLeft),
+    marginRight: getResolvedMargin(props.marginRight),
     displayValue: props.displayValue,
     textAlign: props.textAlign,
     textPosition: props.textPosition,
@@ -308,24 +380,62 @@ async function renderBarCode() {
     }
   }
 
-  Object.keys(options).forEach((key) => {
-    if (options[key] === undefined) {
-      delete options[key]
-    }
-  })
-
-  const canvasWrapper = createCanvasWrapper(context)
-
   try {
-    JsBarcode(canvasWrapper, barcodeValue, options)
-    // #ifndef MP-WEIXIN
-    context.draw()
-    // #endif
+    const encodings = createBarCodeEncodings(barcodeValue, options)
+    const renderOptions = options as BarCodeRenderOptions
+    const size = resolveBarCodeRenderSize(encodings, renderOptions, props.width)
+    canvasWidth.value = size.width
+    canvasHeight.value = size.height
+    applyCanvasNodeSize()
+    await nextTick()
+    await waitCanvasUpdated()
+    drawBarCodeToCanvas(context, encodings, renderOptions, size, getDisplayText())
+    await flushCanvas(context)
   } catch (error) {
     console.error('JsBarcode render error:', error)
     emit('error', error)
   }
 }
+
+async function exportImage(): Promise<string> {
+  await drawTask
+
+  return new Promise((resolve, reject) => {
+    const sourceWidth = Math.ceil(canvasWidth.value * pixelRatio.value)
+    const sourceHeight = Math.ceil(canvasHeight.value * pixelRatio.value)
+    const options: UniApp.CanvasToTempFilePathOptions = {
+      canvasId: canvasId.value,
+      width: sourceWidth,
+      height: sourceHeight,
+      destWidth: sourceWidth,
+      destHeight: sourceHeight,
+      success: (res) => {
+        let tempFilePath = res.tempFilePath
+        // #ifdef MP-DINGTALK
+        tempFilePath = (res as any).filePath
+        // #endif
+        resolve(tempFilePath)
+      },
+      fail: reject
+    }
+
+    // #ifdef MP-WEIXIN
+    if (canvasNode) {
+      ;(options as any).canvas = toRaw(canvasNode)
+    }
+    // #endif
+
+    const exportArgs: [UniApp.CanvasToTempFilePathOptions, any?] = [options]
+    // #ifndef MP-ALIPAY
+    exportArgs.push(proxy)
+    // #endif
+    uni.canvasToTempFilePath(...exportArgs)
+  })
+}
+
+defineExpose<BarCodeExpose>({
+  exportImage
+})
 </script>
 
 <style lang="scss">

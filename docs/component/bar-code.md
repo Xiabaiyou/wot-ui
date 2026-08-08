@@ -61,17 +61,29 @@
 
 ### 自定义尺寸
 
-通过 `width` 和 `height` 调整线条宽度与条码高度。
+通过 `width` 调整条形码整体宽度，通过 `height` 调整包含上下留白、条和文本在内的整体高度。
 
 ```html
-<wd-bar-code value="1234567890" :width="4" :height="80" />
+<!-- 指定整体宽度 -->
+<wd-bar-code value="1234567890" :width="260" :height="80" />
+
+<!-- 宽而矮的紧凑尺寸 -->
+<wd-bar-code value="1234567890" :width="320" :height="50" />
+
+<!-- 增加条形码整体高度 -->
+<wd-bar-code value="1234567890" :height="140" />
+
+<!-- 隐藏文字后做紧凑尺寸 -->
+<wd-bar-code value="1234567890" :height="60" :display-value="false" />
 ```
 
 ### 字体样式
 
-通过 `font-options` 设置文字样式，可选值为 `bold`、`italic`、`bold italic`。
+通过 `font-size` 设置底部数字大小，通过 `font-options` 设置文字样式，可选值为 `bold`、`italic`、`bold italic`。
 
 ```html
+<wd-bar-code value="1234567890" :font-size="14" />
+<wd-bar-code value="1234567890" :font-size="24" />
 <wd-bar-code value="1234567890" font-options="bold italic" />
 ```
 
@@ -86,17 +98,52 @@
 <wd-bar-code value="A123456A" format="codabar" />
 ```
 
+### 特殊格式尺寸
+
+EAN8、UPC、UPCE 这类格式也可以单独调整宽高。
+
+```html
+<wd-bar-code value="1234567" format="EAN8" :width="210" :height="120" />
+<wd-bar-code value="12345678901" format="UPC" :width="240" :height="130" />
+<wd-bar-code value="123456" format="UPCE" :width="200" :height="110" />
+```
+
+### 导出图片
+
+通过组件实例调用 `exportImage()` 导出当前条形码图片。
+
+```vue
+<template>
+  <view>
+    <wd-bar-code ref="barCodeRef" value="1234567890" />
+    <wd-button icon="download" size="small" @click="handleExportImage">导出图片</wd-button>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { BarCodeInstance } from '@/uni_modules/wot-ui/components/wd-bar-code/types'
+
+const barCodeRef = ref<BarCodeInstance | null>(null)
+
+async function handleExportImage() {
+  const path = await barCodeRef.value?.exportImage()
+  console.log(path)
+}
+</script>
+```
+
 ## BarCode Attributes
 
 | 参数 | 说明 | 类型 | 默认值 |
 | --- | --- | --- | --- |
 | value | 条形码内容 | `string \| number` | - |
 | format | 条形码格式，可选值为 `auto`、`CODE128`、`CODE128A`、`CODE128B`、`CODE128C`、`EAN13`、`EAN8`、`UPC`、`UPCE`、`CODE39`、`ITF14`、`MSI`、`MSI10`、`MSI11`、`MSI1010`、`MSI1110`、`pharmacode`、`codabar` | `string` | `auto` |
-| width | 单条竖线宽度 | `number` | `2` |
-| height | 条形码高度 | `number` | `100` |
+| width | 条形码整体宽度 | `number` | `200` |
+| height | 条形码整体渲染高度，包含上下留白、条和文本 | `number` | `100` |
 | text | 显示的文本，默认显示 `value` | `string` | `''` |
 | font | 字体 | `string` | `monospace` |
-| font-size | 字体大小 | `number` | `20` |
+| font-size | 文本大小 | `number` | `20` |
 | font-options | 字体样式，可选值为 `bold`、`italic`、`bold italic` | `string` | `''` |
 | text-margin | 文本与条码的间距 | `number` | `2` |
 | background | 背景色 | `string` | `#ffffff` |
@@ -116,6 +163,12 @@
 | --- | --- | --- |
 | error | 生成失败时触发 | `error` |
 | valid | 校验结果变化时触发 | `valid: boolean` |
+
+## BarCode Methods
+
+| 方法名 | 说明 | 参数 | 返回值 |
+| --- | --- | --- | --- |
+| exportImage | 导出条形码图片 | - | `Promise<string>` |
 
 ## 外部样式类
 

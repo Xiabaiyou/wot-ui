@@ -1,5 +1,8 @@
-import type { ExtractPropTypes } from 'vue'
+import type { ComponentPublicInstance, ExtractPropTypes } from 'vue'
 import { baseProps, makeBooleanProp, makeNumberProp, makeRequiredProp, makeStringProp, numericProp } from '../../common/props'
+
+export const DEFAULT_BAR_CODE_LINE_WIDTH = 2
+export const DEFAULT_BAR_CODE_WIDTH = 200
 
 export type BarCodeFormat =
   | 'auto'
@@ -67,13 +70,13 @@ export const barCodeProps = {
    */
   format: makeStringProp('auto'),
   /**
-   * 单条竖线宽度
+   * 条形码整体宽度
    * 类型: number
-   * 默认值: 2
+   * 默认值: 200
    */
-  width: makeNumberProp(2),
+  width: makeNumberProp(DEFAULT_BAR_CODE_WIDTH),
   /**
-   * 条形码高度
+   * 条形码整体高度，包含上下留白、条和文本
    * 类型: number
    * 默认值: 100
    */
@@ -91,7 +94,7 @@ export const barCodeProps = {
    */
   font: makeStringProp('monospace'),
   /**
-   * 字体大小
+   * 文本大小，底部数字和特殊格式文本都会使用
    * 类型: number
    * 默认值: 20
    */
@@ -170,3 +173,12 @@ export const barCodeProps = {
 }
 
 export type BarCodeProps = ExtractPropTypes<typeof barCodeProps>
+
+export type BarCodeExpose = {
+  /**
+   * 导出条形码图片。
+   */
+  exportImage: () => Promise<string>
+}
+
+export type BarCodeInstance = ComponentPublicInstance<BarCodeProps, BarCodeExpose>

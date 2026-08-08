@@ -61,17 +61,29 @@ Use `line-color` and `background` to customize the barcode colors.
 
 ### Custom Size
 
-Use `width` and `height` to adjust line width and barcode height.
+Use `width` to set the overall barcode width, and `height` to set the overall render height including vertical margins, bars, and text.
 
 ```html
-<wd-bar-code value="1234567890" :width="4" :height="80" />
+<!-- Set the overall width -->
+<wd-bar-code value="1234567890" :width="260" :height="80" />
+
+<!-- Wide and compact size -->
+<wd-bar-code value="1234567890" :width="320" :height="50" />
+
+<!-- Increase overall barcode height -->
+<wd-bar-code value="1234567890" :height="140" />
+
+<!-- Hide text for a compact size -->
+<wd-bar-code value="1234567890" :height="60" :display-value="false" />
 ```
 
 ### Font Style
 
-Use `font-options` to set text style. Supported values are `bold`, `italic`, and `bold italic`.
+Use `font-size` to set the text size, and `font-options` to set text style. Supported `font-options` values are `bold`, `italic`, and `bold italic`.
 
 ```html
+<wd-bar-code value="1234567890" :font-size="14" />
+<wd-bar-code value="1234567890" :font-size="24" />
 <wd-bar-code value="1234567890" font-options="bold italic" />
 ```
 
@@ -86,17 +98,52 @@ The component supports `CODE128`, `CODE128A`, `CODE128B`, `CODE128C`, `EAN13`, `
 <wd-bar-code value="A123456A" format="codabar" />
 ```
 
+### Special Format Sizes
+
+EAN8, UPC, and UPCE can also be displayed with custom sizes.
+
+```html
+<wd-bar-code value="1234567" format="EAN8" :width="210" :height="120" />
+<wd-bar-code value="12345678901" format="UPC" :width="240" :height="130" />
+<wd-bar-code value="123456" format="UPCE" :width="200" :height="110" />
+```
+
+### Export Image
+
+Call `exportImage()` on the component instance to export the current barcode image.
+
+```vue
+<template>
+  <view>
+    <wd-bar-code ref="barCodeRef" value="1234567890" />
+    <wd-button icon="download" size="small" @click="handleExportImage">Export Image</wd-button>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { BarCodeInstance } from '@/uni_modules/wot-ui/components/wd-bar-code/types'
+
+const barCodeRef = ref<BarCodeInstance | null>(null)
+
+async function handleExportImage() {
+  const path = await barCodeRef.value?.exportImage()
+  console.log(path)
+}
+</script>
+```
+
 ## BarCode Attributes
 
 | Property | Description | Type | Default |
 | --- | --- | --- | --- |
 | value | Barcode content | `string \| number` | - |
 | format | Barcode format. Supported values: `auto`, `CODE128`, `CODE128A`, `CODE128B`, `CODE128C`, `EAN13`, `EAN8`, `UPC`, `UPCE`, `CODE39`, `ITF14`, `MSI`, `MSI10`, `MSI11`, `MSI1010`, `MSI1110`, `pharmacode`, `codabar` | `string` | `auto` |
-| width | Line width | `number` | `2` |
-| height | Barcode height | `number` | `100` |
+| width | Overall barcode width | `number` | `200` |
+| height | Overall render height, including vertical margins, bars, and text | `number` | `100` |
 | text | Display text, defaults to `value` | `string` | `''` |
 | font | Font family | `string` | `monospace` |
-| font-size | Font size | `number` | `20` |
+| font-size | Text size | `number` | `20` |
 | font-options | Font style. Supported values: `bold`, `italic`, `bold italic` | `string` | `''` |
 | text-margin | Spacing between text and barcode | `number` | `2` |
 | background | Background color | `string` | `#ffffff` |
@@ -116,6 +163,12 @@ The component supports `CODE128`, `CODE128A`, `CODE128B`, `CODE128C`, `EAN13`, `
 | --- | --- | --- |
 | error | Triggered when rendering fails | `error` |
 | valid | Triggered when validation result changes | `valid: boolean` |
+
+## BarCode Methods
+
+| Method | Description | Arguments | Return value |
+| --- | --- | --- | --- |
+| exportImage | Exports the barcode image | - | `Promise<string>` |
 
 ## External Classes
 
