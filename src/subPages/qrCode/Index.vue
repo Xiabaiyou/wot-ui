@@ -107,7 +107,7 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { QrCodeInstance } from '@/uni_modules/wot-ui/components/wd-qr-code/types'
-import blackMao from '../img/black_mao_1.png'
+import blackMao from '../img/black_mao_square.png'
 
 const { t } = useI18n()
 
@@ -189,7 +189,6 @@ async function handleExport() {
     width: 200px;
     height: 200px;
     display: block;
-    border-radius: $radius-large;
     overflow: hidden;
   }
 }
