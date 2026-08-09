@@ -70,7 +70,13 @@
 
         <demo-group-item :title="$t('qrcode-bei-jing-tu-pian')">
           <view class="page-qr-code__center">
-            <wd-qr-code text="https://wot-ui.cn" :background-image="logoUrl" color-dark="#22324a" color-light="rgba(255, 255, 255, 0.18)" />
+            <wd-qr-code
+              text="https://wot-ui.cn"
+              :background-image="logoUrl"
+              color-dark="rgba(255, 255, 255, 0.8)"
+              color-light="rgba(15, 31, 50, 0.88)"
+              :margin="4"
+            />
           </view>
         </demo-group-item>
       </demo-group>
