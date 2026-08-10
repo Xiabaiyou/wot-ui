@@ -1,6 +1,21 @@
 # 更新日志 
 
 
+### [2.3.2](https://github.com/wot-ui/wot-ui/compare/v2.3.1...v2.3.2) (2026-08-10)
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  更新 qr-code 组件的图片资源 ([318e987](https://github.com/wot-ui/wot-ui/commit/318e9879ac583a3a9b63bbdc0bed7a9bf241c442))
+* ✏️  更新演示 dmeo 的二维码 ([0faacee](https://github.com/wot-ui/wot-ui/commit/0faacee048cdf3fbca4d0993ac595832f05679f9))
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 H5 端二维码导出图片模糊问题 ([#135](https://github.com/wot-ui/wot-ui/issues/135)) ([6537253](https://github.com/wot-ui/wot-ui/commit/6537253143d05b8317f8c83a52d202972e4bc258))
+* 🐛 修复 Slider 组件中图标组件未导入问题 ([#136](https://github.com/wot-ui/wot-ui/issues/136)) ([455d33b](https://github.com/wot-ui/wot-ui/commit/455d33ba974678f2df70ce0d29f155ec404fad43))
+* 🐛 修复二维码 矩阵边界溢出 ([#132](https://github.com/wot-ui/wot-ui/issues/132)) ([05b7287](https://github.com/wot-ui/wot-ui/commit/05b72873cc118e253011ae76efdfa6732c933902))
+
 ### [2.3.1](https://github.com/wot-ui/wot-ui/compare/v2.3.0...v2.3.1) (2026-08-04)
 
 
