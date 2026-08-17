@@ -4,6 +4,10 @@
 
 `v2` 不只是包名升级，也包含表单校验体系、主题变量、部分组件命名和工程配置的调整。迁移时建议先完成依赖和路径替换，再处理 `Form`、`Dialog`、`Cascader` 等高影响组件，最后做样式和平台回归。
 
+::: tip 推荐使用迁移 Skill
+如果使用支持 Agent Skills 的 AI 编程工具，推荐安装 open-wot 的 [`migrate-v1-to-v2` Skill](https://github.com/wot-ui/open-wot/tree/main/skills/migrate-v1-to-v2) 来辅助迁移。它可以扫描项目中的 v1 用法，按影响范围分阶段处理不兼容变更，并使用人工审核的完整图标映射检查图标名称。安装方式参见 [Skills](/guide/skills#安装)。
+:::
+
 ## 迁移概览
 
 | 类型 | v1 | v2 |
@@ -988,13 +992,30 @@ import type { UploadFileItem } from '@/uni_modules/wot-ui/components/wd-upload/t
 
 ## 图标迁移
 
-`v2` 对图标示例和部分组件默认图标做了调整。迁移后如果页面出现空图标、图标名称不匹配或视觉含义不一致，请优先检查 `icon`、`prefix-icon`、`suffix-icon`、`class-prefix`、`css-icon` 等配置。
+`v2` 重新整理了内置图标，部分图标名称发生变化，也有部分图标不再提供。迁移时需要结合图形外观与业务语义选择替代项。
+
+- [Icon 文档中的迁移说明与常用改名](/component/icon#v1-升级到-v2)
+- [使用 open-wot 的迁移 Skill 查看完整图标映射并辅助迁移](https://github.com/wot-ui/open-wot/tree/main/skills/migrate-v1-to-v2)
+
+常见名称变化包括：
+
+| v1            | v2              |
+| ------------- | --------------- |
+| `add`         | `plus`          |
+| `decrease`    | `minus`         |
+| `arrow-left`  | `left`          |
+| `arrow-right` | `right`         |
+| `search`      | `search-line`   |
+| `picture`     | `image`         |
+| `eye-close`   | `eye-invisible` |
+| `setting`     | `settings`      |
+
+图标名称不建议直接进行无差别文本替换。相同目标图标可能承接多个旧图标，动态绑定的图标名称也需要结合业务数据检查。迁移后如果页面出现空图标、图标名称不匹配或视觉含义不一致，请优先检查 `icon`、`icon-class` / `iconClass`、`active-icon` / `activeIcon`、`inactive-icon` / `inactiveIcon`、`prefix-icon` / `prefixIcon`、`suffix-icon` / `suffixIcon` 等配置。
 
 常见场景包括：
 
 - `Button` 旧的 `type="icon"` 需要改为直接传 `icon`。
-- 自定义图标类名前缀在模板中推荐使用 `class-prefix`。
-- 旧示例中的部分图标名可能需要替换为 `v2` 图标文档中存在的名称。
+- 在 `v2` 中找不到等价项的图标需要按业务语义重新选择，或使用自定义图标资源保留原有外观。
 
 ## 主题与深色模式迁移
 

@@ -4,6 +4,10 @@ This guide explains how to migrate your project from `Wot UI v1` to `Wot UI v2`.
 
 `v2` is not just a package name upgrade — it also includes changes to the form validation system, theme variables, some component naming, and project configuration. It is recommended to complete dependency and path replacements first, then handle high-impact components like `Form`, `Dialog`, and `Cascader`, and finally do style and platform regression testing.
 
+::: tip Recommended Migration Skill
+If your AI coding tool supports Agent Skills, install open-wot's [`migrate-v1-to-v2` Skill](https://github.com/wot-ui/open-wot/tree/main/skills/migrate-v1-to-v2) to assist the migration. It scans v1 usage in your project, handles incompatible changes in stages based on impact, and checks icon names against the complete human-reviewed mapping. See [Skills](/en-US/guide/skills#installation) for installation instructions.
+:::
+
 ## Migration Overview
 
 | Type | v1 | v2 |
@@ -989,13 +993,30 @@ import type { UploadFileItem } from '@/uni_modules/wot-ui/components/wd-upload/t
 
 ## Icon Migration
 
-`v2` adjusts icon examples and some component default icons. If empty icons, icon name mismatches, or inconsistent visual meanings appear on the page after migration, please check `icon`, `prefix-icon`, `suffix-icon`, `class-prefix`, `css-icon`, and other configurations first.
+`v2` reorganizes the built-in icon set. Some icon names have changed, while some icons are no longer provided. During migration, choose replacements based on both visual appearance and business meaning.
+
+- [Migration notes and common renames in the Icon documentation](/en-US/component/icon#upgrade-from-v1-to-v2)
+- [Use the open-wot migration Skill to view the complete icon mappings and assist migration](https://github.com/wot-ui/open-wot/tree/main/skills/migrate-v1-to-v2)
+
+Common name changes include:
+
+| v1            | v2              |
+| ------------- | --------------- |
+| `add`         | `plus`          |
+| `decrease`    | `minus`         |
+| `arrow-left`  | `left`          |
+| `arrow-right` | `right`         |
+| `search`      | `search-line`   |
+| `picture`     | `image`         |
+| `eye-close`   | `eye-invisible` |
+| `setting`     | `settings`      |
+
+Icon names should not be migrated through indiscriminate text replacement. Multiple old icons may share one target icon, and dynamically bound icon names need to be checked with their business data. If empty icons, icon name mismatches, or inconsistent visual meanings appear after migration, check `icon`, `icon-class` / `iconClass`, `active-icon` / `activeIcon`, `inactive-icon` / `inactiveIcon`, `prefix-icon` / `prefixIcon`, `suffix-icon` / `suffixIcon`, and related configurations first.
 
 Common scenarios include:
 
 - `Button`'s old `type="icon"` needs to be changed to directly passing `icon`.
-- Custom icon class name prefix in templates is recommended to use `class-prefix`.
-- Some icon names in old examples may need to be replaced with names that exist in `v2` icon documentation.
+- Icons without a suitable `v2` equivalent need a new choice based on business meaning, or can keep their original appearance through custom icon resources.
 
 ## Theme and Dark Mode Migration
 
